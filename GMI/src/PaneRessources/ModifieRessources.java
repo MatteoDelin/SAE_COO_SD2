@@ -13,7 +13,7 @@ public class ModifieRessources extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField title;
-	private JTextField txtNewName;
+	private JTextField textField;
 
 	/**
 	 * Create the panel.
@@ -22,42 +22,40 @@ public class ModifieRessources extends JPanel {
 		setLayout(null);
 		
 		title = new JTextField();
-		title.setText("Modification User");
+		title.setText("Modification Ressource");
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setFont(new Font("Tahoma", Font.BOLD, 32));
 		title.setColumns(10);
 		title.setBounds(10, 11, 870, 51);
 		add(title);
 		
-		txtNewName = new JTextField();
-		
 		String placeholder = "Enter user name";
-		txtNewName.setText(placeholder);
-		txtNewName.setForeground(Color.GRAY);
 		
-		txtNewName.setToolTipText("");
-		txtNewName.setText("New name");
-		txtNewName.setHorizontalAlignment(SwingConstants.CENTER);
-		txtNewName.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		txtNewName.setColumns(10);
-		txtNewName.setBounds(309, 189, 333, 60);
-		add(txtNewName);
-		
-		JButton btnC = new JButton("Modify User");
+		JButton btnC = new JButton("Modify");
 		btnC.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		btnC.setBounds(674, 180, 178, 79);
+		btnC.setBounds(485, 322, 276, 79);
 		add(btnC);
 		
 		JButton CancelButton = new JButton("Cancel");
 		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		CancelButton.setBounds(646, 435, 234, 60);
+		CancelButton.setBounds(654, 487, 234, 60);
 		add(CancelButton);
 		
 		JComboBox ListUser = new JComboBox();
 		ListUser.setToolTipText("");
 		ListUser.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		ListUser.setBounds(40, 188, 234, 60);
+		ListUser.setBounds(98, 330, 334, 60);
 		add(ListUser);
+		
+		textField = new JTextField();
+		textField.setToolTipText("");
+		textField.setText("Enter ressource name");
+		textField.setHorizontalAlignment(SwingConstants.CENTER);
+		textField.setForeground(Color.GRAY);
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		textField.setColumns(10);
+		textField.setBounds(297, 185, 326, 92);
+		add(textField);
 
 	}
 }

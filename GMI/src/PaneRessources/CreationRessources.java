@@ -11,13 +11,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import javax.swing.JComboBox;
 
 
 public class CreationRessources extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField Title;
-	private JTextField TextUser;
+	private JTextField TextName;
+	private JTextField txtDescription;
+	private JComboBox CBDomaine;
 
 	/**
 	 * Create the panel.
@@ -29,54 +32,68 @@ public class CreationRessources extends JPanel {
 		Title = new JTextField();
 		Title.setHorizontalAlignment(SwingConstants.CENTER);
 		Title.setFont(new Font("Tahoma", Font.BOLD, 31));
-		Title.setText("User Creation");
-		Title.setBounds(10, 11, 1060, 30);
+		Title.setText("Ressource Creation");
+		Title.setBounds(10, 11, 1060, 44);
 		add(Title);
 		Title.setColumns(10);
 		
-		TextUser = new JTextField();
+		TextName = new JTextField();
 		String placeholder = "Enter user name";
-		TextUser.setText(placeholder);
-		TextUser.setForeground(Color.GRAY);
+		TextName.setText("Enter ressource name");
+		TextName.setForeground(Color.GRAY);
 
-		TextUser.addFocusListener(new FocusListener() {
+		TextName.addFocusListener(new FocusListener() {
 		    @Override
 		    public void focusGained(FocusEvent e) {
-		        if (TextUser.getText().equals(placeholder)) {
-		            TextUser.setText("");
-		            TextUser.setForeground(Color.BLACK);
+		        if (TextName.getText().equals(placeholder)) {
+		            TextName.setText("");
+		            TextName.setForeground(Color.BLACK);
 		        }
 		    }
 
 		    @Override
 		    public void focusLost(FocusEvent e) {
-		        if (TextUser.getText().isEmpty()) {
-		            TextUser.setText(placeholder);
-		            TextUser.setForeground(Color.GRAY);
+		        if (TextName.getText().isEmpty()) {
+		            TextName.setText(placeholder);
+		            TextName.setForeground(Color.GRAY);
 		        }
 		    }
 		});
 
-		TextUser.setHorizontalAlignment(SwingConstants.CENTER);
-		TextUser.setToolTipText("");
-		TextUser.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		TextUser.setBounds(10, 177, 795, 92);
-		add(TextUser);
-		TextUser.setColumns(10);
+		TextName.setHorizontalAlignment(SwingConstants.CENTER);
+		TextName.setToolTipText("");
+		TextName.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		TextName.setBounds(382, 206, 326, 92);
+		add(TextName);
+		TextName.setColumns(10);
 		
-		JButton CreateUserButton = new JButton("Create user");
+		JButton CreateUserButton = new JButton("Create ressource");
 		CreateUserButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		CreateUserButton.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		CreateUserButton.setBounds(846, 177, 178, 92);
+		CreateUserButton.setBounds(385, 340, 269, 92);
 		add(CreateUserButton);
 		
 		JButton CancelButton = new JButton("Cancel");
 		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		CancelButton.setBounds(836, 649, 234, 60);
+		CancelButton.setBounds(833, 491, 234, 60);
 		add(CancelButton);
+		
+		txtDescription = new JTextField();
+		txtDescription.setToolTipText("");
+		txtDescription.setText("Enter description");
+		txtDescription.setHorizontalAlignment(SwingConstants.CENTER);
+		txtDescription.setForeground(Color.GRAY);
+		txtDescription.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		txtDescription.setColumns(10);
+		txtDescription.setBounds(741, 206, 326, 92);
+		add(txtDescription);
+		
+		CBDomaine = new JComboBox();
+		CBDomaine.setBounds(27, 205, 326, 92);
+		add(CBDomaine);
 
 	}
 }

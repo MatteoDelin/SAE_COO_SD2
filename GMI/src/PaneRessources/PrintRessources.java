@@ -21,7 +21,7 @@ public class PrintRessources extends JPanel {
 		setLayout(null);
 		
 		txtAllUser = new JTextField();
-		txtAllUser.setText("All User");
+		txtAllUser.setText("All Ressource");
 		txtAllUser.setHorizontalAlignment(SwingConstants.CENTER);
 		txtAllUser.setFont(new Font("Tahoma", Font.BOLD, 32));
 		txtAllUser.setColumns(10);
@@ -29,7 +29,7 @@ public class PrintRessources extends JPanel {
 		add(txtAllUser);
 		
 		table = new JTable();
-		table.setBounds(10, 73, 1048, 548);
+		table.setBounds(10, 73, 1048, 471);
 		add(table);
 
 	}

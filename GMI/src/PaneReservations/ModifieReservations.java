@@ -8,12 +8,16 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JComboBox;
+import com.toedter.calendar.JDateChooser;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ModifieReservations extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField title;
-	private JTextField txtNewName;
+	private JTextField textField;
+	private JTextField textField_1;
 
 	/**
 	 * Create the panel.
@@ -22,42 +26,62 @@ public class ModifieReservations extends JPanel {
 		setLayout(null);
 		
 		title = new JTextField();
-		title.setText("Modification User");
+		title.setText("Modification Reservation");
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setFont(new Font("Tahoma", Font.BOLD, 32));
 		title.setColumns(10);
-		title.setBounds(10, 11, 870, 51);
+		title.setBounds(10, 11, 988, 51);
 		add(title);
 		
-		txtNewName = new JTextField();
-		
 		String placeholder = "Enter user name";
-		txtNewName.setText(placeholder);
-		txtNewName.setForeground(Color.GRAY);
 		
-		txtNewName.setToolTipText("");
-		txtNewName.setText("New name");
-		txtNewName.setHorizontalAlignment(SwingConstants.CENTER);
-		txtNewName.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		txtNewName.setColumns(10);
-		txtNewName.setBounds(309, 189, 333, 60);
-		add(txtNewName);
-		
-		JButton btnC = new JButton("Modify User");
-		btnC.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		btnC.setBounds(674, 180, 178, 79);
-		add(btnC);
+		JButton btnModify = new JButton("Modify");
+		btnModify.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnModify.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		btnModify.setBounds(487, 283, 234, 79);
+		add(btnModify);
 		
 		JButton CancelButton = new JButton("Cancel");
 		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		CancelButton.setBounds(646, 435, 234, 60);
+		CancelButton.setBounds(764, 462, 234, 60);
 		add(CancelButton);
 		
-		JComboBox ListUser = new JComboBox();
-		ListUser.setToolTipText("");
-		ListUser.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		ListUser.setBounds(40, 188, 234, 60);
-		add(ListUser);
+		JComboBox CBUser = new JComboBox();
+		CBUser.setBounds(29, 92, 295, 38);
+		add(CBUser);
+		
+		JComboBox CBRessources = new JComboBox();
+		CBRessources.setBounds(359, 93, 295, 37);
+		add(CBRessources);
+		
+		JComboBox CBType = new JComboBox();
+		CBType.setBounds(684, 92, 295, 37);
+		add(CBType);
+		
+		textField = new JTextField();
+		textField.setText("Duration of reservations");
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 22));
+		textField.setBounds(684, 167, 295, 38);
+		add(textField);
+		
+		textField_1 = new JTextField();
+		textField_1.setText("Hour");
+		textField_1.setFont(new Font("Tahoma", Font.PLAIN, 22));
+		textField_1.setBounds(359, 167, 295, 38);
+		add(textField_1);
+		
+		JDateChooser dateChooser = new JDateChooser();
+		dateChooser.setFont(new Font("Tahoma", Font.PLAIN, 22));
+		dateChooser.setDateFormatString("dd/MM/yyyy");
+		dateChooser.setBounds(29, 167, 295, 38);
+		add(dateChooser);
+		
+		JComboBox CBChooser = new JComboBox();
+		CBChooser.setBounds(25, 295, 409, 69);
+		add(CBChooser);
 
 	}
 }

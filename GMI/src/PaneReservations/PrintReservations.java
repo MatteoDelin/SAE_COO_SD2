@@ -11,7 +11,7 @@ import javax.swing.JTable;
 public class PrintReservations extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txtAllUser;
+	private JTextField txtAllReservation;
 	private JTable table;
 
 	/**
@@ -20,16 +20,16 @@ public class PrintReservations extends JPanel {
 	public PrintReservations() {
 		setLayout(null);
 		
-		txtAllUser = new JTextField();
-		txtAllUser.setText("All User");
-		txtAllUser.setHorizontalAlignment(SwingConstants.CENTER);
-		txtAllUser.setFont(new Font("Tahoma", Font.BOLD, 32));
-		txtAllUser.setColumns(10);
-		txtAllUser.setBounds(10, 11, 1048, 51);
-		add(txtAllUser);
+		txtAllReservation = new JTextField();
+		txtAllReservation.setText("All Reservation");
+		txtAllReservation.setHorizontalAlignment(SwingConstants.CENTER);
+		txtAllReservation.setFont(new Font("Tahoma", Font.BOLD, 32));
+		txtAllReservation.setColumns(10);
+		txtAllReservation.setBounds(10, 11, 1048, 51);
+		add(txtAllReservation);
 		
 		table = new JTable();
-		table.setBounds(10, 73, 1048, 548);
+		table.setBounds(10, 73, 1048, 482);
 		add(table);
 
 	}

@@ -8,11 +8,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.Color;
 
 public class DeleteRessources extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField title;
+	private JTextField textField;
 
 	/**
 	 * Create the panel.
@@ -21,28 +23,32 @@ public class DeleteRessources extends JPanel {
 		setLayout(null);
 		
 		title = new JTextField();		
-		title.setText("Delete User");
+		title.setText("Delete Ressource");
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setFont(new Font("Tahoma", Font.BOLD, 32));
 		title.setColumns(10);
-		title.setBounds(10, 11, 1031, 51);
+		title.setBounds(10, 11, 1099, 51);
 		add(title);
 		
 		JButton btnDelate = new JButton("Delete");
 		btnDelate.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		btnDelate.setBounds(716, 190, 178, 79);
+		btnDelate.setBounds(660, 190, 178, 79);
 		add(btnDelate);
 		
 		JButton CancelButton = new JButton("Cancel");
 		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		CancelButton.setBounds(807, 525, 234, 60);
+		CancelButton.setBounds(875, 498, 234, 60);
 		add(CancelButton);
 		
-		JComboBox ListUser = new JComboBox();
-		ListUser.setToolTipText("");
-		ListUser.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		ListUser.setBounds(82, 198, 397, 60);
-		add(ListUser);
+		textField = new JTextField();
+		textField.setToolTipText("");
+		textField.setText("Enter ressource name");
+		textField.setHorizontalAlignment(SwingConstants.CENTER);
+		textField.setForeground(Color.GRAY);
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		textField.setColumns(10);
+		textField.setBounds(300, 183, 326, 92);
+		add(textField);
 
 	}
 
