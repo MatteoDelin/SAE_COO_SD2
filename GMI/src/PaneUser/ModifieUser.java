@@ -45,7 +45,7 @@ public class ModifieUser extends JPanel {
 		
 		JButton btnC = new JButton("Modify User");
 		btnC.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		btnC.setBounds(674, 180, 178, 79);
+		btnC.setBounds(674, 180, 234, 79);
 		add(btnC);
 		
 		JButton CancelButton = new JButton("Cancel");
