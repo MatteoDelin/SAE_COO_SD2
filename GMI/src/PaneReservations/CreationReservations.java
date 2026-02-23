@@ -45,7 +45,7 @@ public class CreationReservations extends JPanel {
 						Title.setHorizontalAlignment(SwingConstants.CENTER);
 						Title.setFont(new Font("Tahoma", Font.BOLD, 31));
 						Title.setText("Reservations Creation");
-						setLayout(new MigLayout("", "[1012px,grow]", "[100,grow][50][50][][200,grow][]"));
+						setLayout(new MigLayout("", "[grow]", "[100,grow][50][50][][200,grow][]"));
 						add(panel, "cell 0 0,growx,aligny top");
 						
 						JPanel panel_1 = new JPanel();

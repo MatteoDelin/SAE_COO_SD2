@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.JComboBox;
+import net.miginfocom.swing.MigLayout;
 
 
 public class CreationRessources extends JPanel {
@@ -21,79 +22,90 @@ public class CreationRessources extends JPanel {
 	private JTextField TextName;
 	private JTextField txtDescription;
 	private JComboBox CBDomaine;
+	private JPanel panel;
+	private JPanel panel_1;
+	private JPanel panel_2;
+	private JPanel panel_3;
 
 	/**
 	 * Create the panel.
 	 */
 	public CreationRessources() {
 		setBackground(new Color(240, 240, 240));
-		setLayout(null);
+		setLayout(new MigLayout("", "[grow]", "[44px,grow][93px][92px,grow][60px]"));
+		
+		panel = new JPanel();
+		add(panel, "flowx,cell 0 0,grow");
 		
 		Title = new JTextField();
+		panel.add(Title);
 		Title.setHorizontalAlignment(SwingConstants.CENTER);
 		Title.setFont(new Font("Tahoma", Font.BOLD, 31));
 		Title.setText("Ressource Creation");
-		Title.setBounds(10, 11, 1060, 44);
-		add(Title);
 		Title.setColumns(10);
-		
-		TextName = new JTextField();
 		String placeholder = "Enter user name";
-		TextName.setText("Enter ressource name");
-		TextName.setForeground(Color.GRAY);
-
-		TextName.addFocusListener(new FocusListener() {
-		    @Override
-		    public void focusGained(FocusEvent e) {
-		        if (TextName.getText().equals(placeholder)) {
-		            TextName.setText("");
-		            TextName.setForeground(Color.BLACK);
-		        }
-		    }
-
-		    @Override
-		    public void focusLost(FocusEvent e) {
-		        if (TextName.getText().isEmpty()) {
-		            TextName.setText(placeholder);
-		            TextName.setForeground(Color.GRAY);
-		        }
-		    }
-		});
-
-		TextName.setHorizontalAlignment(SwingConstants.CENTER);
-		TextName.setToolTipText("");
-		TextName.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		TextName.setBounds(382, 206, 326, 92);
-		add(TextName);
-		TextName.setColumns(10);
+		
+		panel_2 = new JPanel();
+		add(panel_2, "cell 0 2,grow");
 		
 		JButton CreateUserButton = new JButton("Create ressource");
+		panel_2.add(CreateUserButton);
 		CreateUserButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		CreateUserButton.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		CreateUserButton.setBounds(385, 340, 269, 92);
-		add(CreateUserButton);
+		
+		panel_3 = new JPanel();
+		add(panel_3, "cell 0 3,alignx right,growy");
 		
 		JButton CancelButton = new JButton("Cancel");
+		panel_3.add(CancelButton);
 		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		CancelButton.setBounds(833, 491, 234, 60);
-		add(CancelButton);
 		
-		txtDescription = new JTextField();
-		txtDescription.setToolTipText("");
-		txtDescription.setText("Enter description");
-		txtDescription.setHorizontalAlignment(SwingConstants.CENTER);
-		txtDescription.setForeground(Color.GRAY);
-		txtDescription.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		txtDescription.setColumns(10);
-		txtDescription.setBounds(741, 206, 326, 92);
-		add(txtDescription);
+		panel_1 = new JPanel();
+		add(panel_1, "flowx,cell 0 1,grow");
 		
 		CBDomaine = new JComboBox();
-		CBDomaine.setBounds(27, 205, 326, 92);
-		add(CBDomaine);
+		CBDomaine.setEditable(true);
+		panel_1.add(CBDomaine);
+		
+		TextName = new JTextField();
+		panel_1.add(TextName);
+		TextName.setText("Ressource name");
+		TextName.setForeground(Color.GRAY);
+		
+				TextName.addFocusListener(new FocusListener() {
+				    @Override
+				    public void focusGained(FocusEvent e) {
+				        if (TextName.getText().equals(placeholder)) {
+				            TextName.setText("");
+				            TextName.setForeground(Color.BLACK);
+				        }
+				    }
+		
+				    @Override
+				    public void focusLost(FocusEvent e) {
+				        if (TextName.getText().isEmpty()) {
+				            TextName.setText(placeholder);
+				            TextName.setForeground(Color.GRAY);
+				        }
+				    }
+				});
+				
+						TextName.setHorizontalAlignment(SwingConstants.CENTER);
+						TextName.setToolTipText("");
+						TextName.setFont(new Font("Tahoma", Font.PLAIN, 28));
+						TextName.setColumns(10);
+						
+						txtDescription = new JTextField();
+						panel_1.add(txtDescription);
+						txtDescription.setToolTipText("");
+						txtDescription.setText("Description");
+						txtDescription.setHorizontalAlignment(SwingConstants.CENTER);
+						txtDescription.setForeground(Color.GRAY);
+						txtDescription.setFont(new Font("Tahoma", Font.PLAIN, 28));
+						txtDescription.setColumns(10);
 
 	}
 }

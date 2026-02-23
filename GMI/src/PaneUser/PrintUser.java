@@ -7,6 +7,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
+import net.miginfocom.swing.MigLayout;
 
 public class PrintUser extends JPanel {
 
@@ -18,19 +19,23 @@ public class PrintUser extends JPanel {
 	 * Create the panel.
 	 */
 	public PrintUser() {
-		setLayout(null);
+		setLayout(new MigLayout("", "[grow]", "[51px][grow]"));
+		
+		JPanel panel = new JPanel();
+		add(panel, "flowx,cell 0 0,grow");
 		
 		txtAllUser = new JTextField();
+		panel.add(txtAllUser);
 		txtAllUser.setText("All User");
 		txtAllUser.setHorizontalAlignment(SwingConstants.CENTER);
 		txtAllUser.setFont(new Font("Tahoma", Font.BOLD, 32));
 		txtAllUser.setColumns(10);
-		txtAllUser.setBounds(10, 11, 1048, 51);
-		add(txtAllUser);
+		
+		JPanel panel_1 = new JPanel();
+		add(panel_1, "flowx,cell 0 1,grow");
 		
 		table = new JTable();
-		table.setBounds(10, 73, 1048, 548);
-		add(table);
+		panel_1.add(table);
 
 	}
 }

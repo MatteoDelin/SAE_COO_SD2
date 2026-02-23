@@ -7,6 +7,8 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
+import net.miginfocom.swing.MigLayout;
+import java.awt.FlowLayout;
 
 public class PrintRessources extends JPanel {
 
@@ -18,19 +20,25 @@ public class PrintRessources extends JPanel {
 	 * Create the panel.
 	 */
 	public PrintRessources() {
-		setLayout(null);
+		setLayout(new MigLayout("", "[grow]", "[51px][grow]"));
+		
+		JPanel panel = new JPanel();
+		add(panel, "flowx,cell 0 0,grow");
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		txtAllUser = new JTextField();
+		panel.add(txtAllUser);
 		txtAllUser.setText("All Ressource");
 		txtAllUser.setHorizontalAlignment(SwingConstants.CENTER);
 		txtAllUser.setFont(new Font("Tahoma", Font.BOLD, 32));
 		txtAllUser.setColumns(10);
-		txtAllUser.setBounds(10, 11, 1048, 51);
-		add(txtAllUser);
+		
+		JPanel panel_1 = new JPanel();
+		add(panel_1, "flowx,cell 0 1,grow");
+		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		table = new JTable();
-		table.setBounds(10, 73, 1048, 471);
-		add(table);
+		panel_1.add(table);
 
 	}
 }

@@ -8,54 +8,82 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JComboBox;
+import net.miginfocom.swing.MigLayout;
 
 public class ModifieRessources extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField title;
-	private JTextField textField;
+	private JTextField txtRessourceName;
+	private JTextField txtDescription;
 
 	/**
 	 * Create the panel.
 	 */
 	public ModifieRessources() {
-		setLayout(null);
+		setLayout(new MigLayout("", "[grow]", "[51px,grow][92px][][][79px,grow][60px]"));
+		
+		JPanel panel = new JPanel();
+		add(panel, "cell 0 0,grow");
 		
 		title = new JTextField();
+		panel.add(title);
 		title.setText("Modification Ressource");
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setFont(new Font("Tahoma", Font.BOLD, 32));
-		title.setColumns(10);
-		title.setBounds(10, 11, 870, 51);
-		add(title);
 		
 		String placeholder = "Enter user name";
 		
-		JButton btnC = new JButton("Modify");
-		btnC.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		btnC.setBounds(485, 322, 276, 79);
-		add(btnC);
+		JPanel panel_4 = new JPanel();
+		add(panel_4, "cell 0 2,grow");
+		
+		JButton btnCheck = new JButton("Check");
+		btnCheck.setFont(new Font("Dialog", Font.PLAIN, 28));
+		panel_4.add(btnCheck);
+		
+		JPanel panel_5 = new JPanel();
+		add(panel_5, "cell 0 3,grow");
+		
+		txtDescription = new JTextField();
+		txtDescription.setToolTipText("");
+		txtDescription.setText("Description");
+		txtDescription.setHorizontalAlignment(SwingConstants.CENTER);
+		txtDescription.setForeground(Color.GRAY);
+		txtDescription.setFont(new Font("Dialog", Font.PLAIN, 28));
+		txtDescription.setColumns(10);
+		panel_5.add(txtDescription);
+		
+		JPanel panel_3 = new JPanel();
+		add(panel_3, "cell 0 5,alignx right,growy");
 		
 		JButton CancelButton = new JButton("Cancel");
+		panel_3.add(CancelButton);
 		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		CancelButton.setBounds(654, 487, 234, 60);
-		add(CancelButton);
+		
+		JPanel panel_2 = new JPanel();
+		add(panel_2, "flowx,cell 0 4,grow");
+		
+		JButton btnModify = new JButton("Modify");
+		panel_2.add(btnModify);
+		btnModify.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		
+		JPanel panel_1 = new JPanel();
+		add(panel_1, "flowx,cell 0 1,grow");
 		
 		JComboBox ListUser = new JComboBox();
+		ListUser.setEditable(true);
+		panel_1.add(ListUser);
 		ListUser.setToolTipText("");
 		ListUser.setFont(new Font("Tahoma", Font.PLAIN, 29));
-		ListUser.setBounds(98, 330, 334, 60);
-		add(ListUser);
 		
-		textField = new JTextField();
-		textField.setToolTipText("");
-		textField.setText("Enter ressource name");
-		textField.setHorizontalAlignment(SwingConstants.CENTER);
-		textField.setForeground(Color.GRAY);
-		textField.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		textField.setColumns(10);
-		textField.setBounds(297, 185, 326, 92);
-		add(textField);
+		txtRessourceName = new JTextField();
+		panel_1.add(txtRessourceName);
+		txtRessourceName.setToolTipText("");
+		txtRessourceName.setText("Ressource name");
+		txtRessourceName.setHorizontalAlignment(SwingConstants.CENTER);
+		txtRessourceName.setForeground(Color.GRAY);
+		txtRessourceName.setFont(new Font("Tahoma", Font.PLAIN, 28));
+		txtRessourceName.setColumns(10);
 
 	}
 }
