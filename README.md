@@ -1,6 +1,6 @@
 # SAE COO SD2 — Application de Gestion de Réservations
 
-> Projet universitaire réalisé dans le cadre de la SAE (Situation d'Apprentissage et d'Évaluation) de **Conception Orientée Objet** — BUT Informatique, Semestre 2.
+> Projet universitaire réalisé dans le cadre de la SAE (Situation d'Apprentissage et d'Évaluation) de **Conception Orientée Objet** — BUT Science des Données, Semestre 3.
 
 ---
 
