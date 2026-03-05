@@ -2,107 +2,154 @@ package PaneReservations;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import java.awt.Color;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import javax.swing.JList;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import com.toedter.calendar.JDateChooser;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import net.miginfocom.swing.MigLayout;
 import java.awt.FlowLayout;
-import javax.swing.JLabel;
 
+/**
+ * Panneau de modification d'une réservation.
+ *
+ * Recherche (identifiant) : Utilisateur + Ressource + Date de début
+ * Champs modifiables      : Heure de début, Durée, Type d'emprunt
+ */
 public class ModifieReservations extends JPanel {
 
-	private static final long serialVersionUID = 1L;
-	private JTextField title;
-	private JTextField txtHour;
-	private JTextField textField_1;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Create the panel.
-	 */
-	public ModifieReservations() {
-		setLayout(new MigLayout("", "[grow]", "[51px,grow][][][][grow][60px]"));
-		
-		JPanel panel = new JPanel();
-		add(panel, "cell 0 0,alignx center,growy");
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
-		title = new JTextField();
-		panel.add(title);
-		title.setText("Modification Reservation");
-		title.setHorizontalAlignment(SwingConstants.CENTER);
-		title.setFont(new Font("Tahoma", Font.BOLD, 32));
-		
-		String placeholder = "Enter user name";
-		
-		JPanel panel_1 = new JPanel();
-		add(panel_1, "cell 0 1,grow");
-		
-		JComboBox CBUser = new JComboBox();
-		CBUser.setEditable(true);
-		panel_1.add(CBUser);
-		
-		JComboBox CBRessources = new JComboBox();
-		CBRessources.setEditable(true);
-		panel_1.add(CBRessources);
-		
-		JDateChooser dateChooser = new JDateChooser();
-		panel_1.add(dateChooser);
-		dateChooser.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		dateChooser.setDateFormatString("dd/MM/yyyy");
-		
-		txtHour = new JTextField();
-		panel_1.add(txtHour);
-		txtHour.setText("Hour (00:00)");
-		txtHour.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		
-		JPanel panel_2 = new JPanel();
-		add(panel_2, "cell 0 2,grow");
-		panel_2.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
-		JButton btnCheck = new JButton("Check");
-		btnCheck.setFont(new Font("Dialog", Font.PLAIN, 28));
-		panel_2.add(btnCheck);
-		
-		JPanel panel_3 = new JPanel();
-		add(panel_3, "cell 0 3,growx,aligny center");
-		
-		JComboBox CBType = new JComboBox();
-		panel_3.add(CBType);
-		CBType.setEditable(true);
-		
-		JLabel LabelEndDate = new JLabel("Ending date");
-		LabelEndDate.setFont(new Font("Dialog", Font.BOLD, 18));
-		panel_3.add(LabelEndDate);
-		
-		textField_1 = new JTextField();
-		textField_1.setText("Hour (00:00)");
-		textField_1.setFont(new Font("Dialog", Font.PLAIN, 22));
-		panel_3.add(textField_1);
-		
-		JPanel panel_5 = new JPanel();
-		add(panel_5, "flowx,cell 0 4,grow");
-		panel_5.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
-		JButton btnModify = new JButton("Modify");
-		panel_5.add(btnModify);
-		btnModify.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		btnModify.setFont(new Font("Tahoma", Font.PLAIN, 28));
-		
-		JPanel panel_4 = new JPanel();
-		add(panel_4, "cell 0 5,alignx right,growy");
-		
-		JButton CancelButton = new JButton("Cancel");
-		panel_4.add(CancelButton);
-		CancelButton.setFont(new Font("Tahoma", Font.PLAIN, 29));
+    // --- Bloc recherche ---
+    private JComboBox<String> CBUser;
+    private JComboBox<String> CBRessources;
+    private JDateChooser      dateChooser;       // date de début (clé)
+    private JButton           checkButton;
 
-	}
+    // --- Bloc modification (déverrouillé après Check) ---
+    private JTextField        txtHour;           // heure de début modifiable
+    private JTextField        txtDuree;          // durée en minutes modifiable
+    private JComboBox<String> CBType;            // type d'emprunt modifiable
+
+    // --- Boutons bas ---
+    private JButton modifyButton;
+    private JButton cancelButton;
+
+    public ModifieReservations() {
+        setLayout(new MigLayout("", "[grow]", "[51px,grow][][][][][grow][60px]"));
+
+        // ── Titre ──────────────────────────────────────────────────────────
+        JPanel panelTitre = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JTextField title = new JTextField("Modification Reservation");
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setFont(new Font("Tahoma", Font.BOLD, 32));
+        title.setEditable(false);
+        panelTitre.add(title);
+        add(panelTitre, "cell 0 0, alignx center, growy");
+
+        // ── Ligne 1 : critères de recherche ───────────────────────────────
+        JPanel panelRecherche = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
+
+        JLabel lUser = new JLabel("Utilisateur :");
+        lUser.setFont(new Font("Tahoma", Font.BOLD, 14));
+        panelRecherche.add(lUser);
+        CBUser = new JComboBox<>(); CBUser.setEditable(true);
+        panelRecherche.add(CBUser);
+
+        JLabel lRess = new JLabel("Ressource :");
+        lRess.setFont(new Font("Tahoma", Font.BOLD, 14));
+        panelRecherche.add(lRess);
+        CBRessources = new JComboBox<>(); CBRessources.setEditable(true);
+        panelRecherche.add(CBRessources);
+
+        JLabel lDate = new JLabel("Date de début :");
+        lDate.setFont(new Font("Tahoma", Font.BOLD, 14));
+        panelRecherche.add(lDate);
+        dateChooser = new JDateChooser();
+        dateChooser.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        dateChooser.setDateFormatString("dd/MM/yyyy");
+        panelRecherche.add(dateChooser);
+
+        add(panelRecherche, "cell 0 1, growx");
+
+        // ── Ligne 2 : bouton Check ─────────────────────────────────────────
+        JPanel panelCheck = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        checkButton = new JButton("🔍  Rechercher");
+        checkButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        panelCheck.add(checkButton);
+        add(panelCheck, "cell 0 2, growx");
+
+        // ── Séparateur visuel ──────────────────────────────────────────────
+        JLabel sep = new JLabel("── Champs modifiables ──────────────────────────────────────");
+        sep.setFont(new Font("Tahoma", Font.ITALIC, 11));
+        sep.setForeground(new java.awt.Color(150, 150, 150));
+        add(sep, "cell 0 3, growx, gaptop 6");
+
+        // ── Ligne 3 : champs modifiables ──────────────────────────────────
+        JPanel panelEdit = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
+
+        JLabel lHeure = new JLabel("Heure de début :");
+        lHeure.setFont(new Font("Tahoma", Font.BOLD, 14));
+        panelEdit.add(lHeure);
+        txtHour = new JTextField("HH:mm", 7);
+        txtHour.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        txtHour.setEnabled(false);
+        panelEdit.add(txtHour);
+
+        JLabel lDuree = new JLabel("Durée (min) :");
+        lDuree.setFont(new Font("Tahoma", Font.BOLD, 14));
+        panelEdit.add(lDuree);
+        txtDuree = new JTextField("60", 5);
+        txtDuree.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        txtDuree.setEnabled(false);
+        panelEdit.add(txtDuree);
+
+        JLabel lType = new JLabel("Type :");
+        lType.setFont(new Font("Tahoma", Font.BOLD, 14));
+        panelEdit.add(lType);
+        CBType = new JComboBox<>(new String[]{"Emprunt", "Cours", "Maintenance"});
+        CBType.setEditable(true);
+        CBType.setEnabled(false);
+        panelEdit.add(CBType);
+
+        add(panelEdit, "cell 0 4, growx");
+
+        // ── Bouton Modify ──────────────────────────────────────────────────
+        JPanel panelModify = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        modifyButton = new JButton("✏️  Modifier");
+        modifyButton.setFont(new Font("Tahoma", Font.PLAIN, 22));
+        modifyButton.setEnabled(false);
+        panelModify.add(modifyButton);
+        add(panelModify, "cell 0 5, grow");
+
+        // ── Bouton Cancel ──────────────────────────────────────────────────
+        JPanel panelCancel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        cancelButton = new JButton("Cancel");
+        cancelButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        panelCancel.add(cancelButton);
+        add(panelCancel, "cell 0 6, alignx right, growy");
+    }
+
+    /** Active les champs éditables et les pré-remplit avec les valeurs trouvées. */
+    public void unlockEdit(String heure, int duree, String type) {
+        txtHour.setText(heure);
+        txtDuree.setText(String.valueOf(duree));
+        CBType.setSelectedItem(type);
+        txtHour.setEnabled(true);
+        txtDuree.setEnabled(true);
+        CBType.setEnabled(true);
+        modifyButton.setEnabled(true);
+    }
+
+    // ── Getters ───────────────────────────────────────────────────────────
+    public JComboBox<String> getCBUser()       { return CBUser; }
+    public JComboBox<String> getCBRessources() { return CBRessources; }
+    public JDateChooser      getDateChooser()  { return dateChooser; }
+    public JTextField        getTxtHour()      { return txtHour; }
+    public JTextField        getTxtDuree()     { return txtDuree; }
+    public JComboBox<String> getCBType()       { return CBType; }
+    public JButton           getCheckButton()  { return checkButton; }
+    public JButton           getModifyButton() { return modifyButton; }
+    public JButton           getCancelButton() { return cancelButton; }
 }
