@@ -131,16 +131,12 @@ Le diagramme de classes (`DiagrammeClasse.loo`) documente l'architecture orient�
 
 | Élément | Détail |
 |--------|--------|
-| **Formation** | BUT Informatique |
+| **Formation** | BUT Science des Données |
 | **Matière** | Conception Orientée Objet (COO) |
-| **Semestre** | S2 |
+| **Semestre** | S3 |
 | **Type** | SAE (Situation d'Apprentissage et d'Évaluation) |
 | **Livrables** | Code source commenté · Documentation · Support oral |
 | **Évaluation** | Oral + écrit |
 
 ---
 
-## Auteur
-
-**Matteo Delin**  
-[GitHub @MatteoDelin](https://github.com/MatteoDelin)
