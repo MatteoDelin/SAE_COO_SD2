@@ -1,5 +1,6 @@
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class Reservations {
@@ -38,12 +39,24 @@ public class Reservations {
     public void setType_emprunt(String t)       { this.type_emprunt = t; }
 
     /**
-     * Recherche statique : reçoit explicitement la liste pour éviter
-     * l'appel d'instance dans MainWindow.
+     * Compare deux dates en ignorant l'heure et les millisecondes.
+     * Nécessaire car JDateChooser retourne minuit exact alors que
+     * les dates parsées depuis le CSV peuvent avoir des ms résiduelles.
      */
+    private static boolean memJour(Date a, Date b) {
+        if (a == null || b == null) return false;
+        Calendar ca = Calendar.getInstance();
+        Calendar cb = Calendar.getInstance();
+        ca.setTime(a);
+        cb.setTime(b);
+        return ca.get(Calendar.YEAR)         == cb.get(Calendar.YEAR)
+            && ca.get(Calendar.MONTH)        == cb.get(Calendar.MONTH)
+            && ca.get(Calendar.DAY_OF_MONTH) == cb.get(Calendar.DAY_OF_MONTH);
+    }
+
     /**
-     * Recherche par utilisateur, ressource et date uniquement.
-     * L'heure n'est plus un critère d'identification — elle est modifiable.
+     * Recherche par utilisateur, ressource et date (jour uniquement).
+     * L'heure n'est pas un critère d'identification — elle est modifiable.
      */
     static Reservations print_reservation(ArrayList<Reservations> liste,
                                           String nom_user, String nom_ressource,
@@ -51,7 +64,7 @@ public class Reservations {
         for (Reservations e : liste) {
             if (e.getUser().getNom().equals(nom_user)
                     && e.getRessource().getNom().equals(nom_ressource)
-                    && e.getDate().equals(date)) {
+                    && memJour(e.getDate(), date)) {
                 return e;
             }
         }
