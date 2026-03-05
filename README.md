@@ -137,6 +137,7 @@ Le diagramme de classes (`DiagrammeClasse.loo`) documente l'architecture orient�
 | **Type** | SAE (Situation d'Apprentissage et d'Évaluation) |
 | **Livrables** | Code source commenté · Documentation · Support oral |
 | **Évaluation** | Oral + écrit |
+| **Date** | Le 10 Mars |
 
 ---
 
