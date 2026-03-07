@@ -50,9 +50,9 @@ public class HomePanel extends JPanel {
     private final DefaultTableModel modelUsers = new DefaultTableModel(
             new String[]{"Nom"}, 0);
     private final DefaultTableModel modelRess = new DefaultTableModel(
-            new String[]{"Nom", "Description", "Domaine"}, 0);
+            new String[]{"Name", "Description", "Domain"}, 0);
     private final DefaultTableModel modelReserv = new DefaultTableModel(
-            new String[]{"Utilisateur", "Ressource", "Date", "Heure", "Durée (min)", "Type"}, 0);
+            new String[]{"User", "Resource", "Date", "Time", "Duration (min)", "Type"}, 0);
 
     private JLabel statusLabel;
     private JButton exportButton;
@@ -63,7 +63,7 @@ public class HomePanel extends JPanel {
         setLayout(new MigLayout("insets 20", "[grow]", "[][15][grow][8][]"));
 
         // ── Titre ──────────────────────────────────────────────────────────
-        JLabel titre = new JLabel("GMI – Gestion des Ressources", SwingConstants.CENTER);
+        JLabel titre = new JLabel("GMI – Resource Management", SwingConstants.CENTER);
         titre.setFont(new Font("Tahoma", Font.BOLD, 26));
         titre.setForeground(new Color(40, 70, 130));
         add(titre, "cell 0 0, growx, align center");
@@ -74,14 +74,14 @@ public class HomePanel extends JPanel {
         // ── Onglets de prévisualisation ────────────────────────────────────
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        tabs.addTab("👤 Utilisateurs", buildScrollTable(modelUsers));
-        tabs.addTab("📦 Ressources",   buildScrollTable(modelRess));
-        tabs.addTab("📅 Réservations", buildScrollTable(modelReserv));
+        tabs.addTab("👤 Users", buildScrollTable(modelUsers));
+        tabs.addTab("📦 Resources",   buildScrollTable(modelRess));
+        tabs.addTab("📅 Reservations", buildScrollTable(modelReserv));
         add(tabs, "cell 0 2, grow");
 
         // ── Barre de statut ────────────────────────────────────────────────
         statusLabel = new JLabel(
-                "Aucun fichier chargé — glissez un CSV ou cliquez Parcourir.",
+                "No file loaded — drag a CSV or click Browse.",
                 SwingConstants.LEFT);
         statusLabel.setFont(new Font("Tahoma", Font.ITALIC, 12));
         statusLabel.setForeground(Color.GRAY);
@@ -91,12 +91,12 @@ public class HomePanel extends JPanel {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bar.setOpaque(false);
 
-        browseButton = new JButton("📂  Parcourir…");
+        browseButton = new JButton("📂  Browse…");
         browseButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
         browseButton.addActionListener(e -> openChooser());
         bar.add(browseButton);
 
-        exportButton = new JButton("💾  Exporter CSV");
+        exportButton = new JButton("💾  Export CSV");
         exportButton.setFont(new Font("Tahoma", Font.BOLD, 14));
         exportButton.setBackground(new Color(50, 120, 190));
         exportButton.setForeground(Color.WHITE);
@@ -129,9 +129,9 @@ public class HomePanel extends JPanel {
 
         JLabel hint = new JLabel(
             "<html><center>"
-            + "🗂️ &nbsp;<b>Glissez-déposez un fichier CSV ici</b> &nbsp;(ou cliquez pour parcourir)<br>"
+            + "🗂️ &nbsp;<b>Drag and drop a CSV file here</b> &nbsp;(or click to browse)<br>"
             + "<span style='font-size:10px;color:#777'>"
-            + "Format : Réservation au nom de ; Domaines ; Ressource ; Description ; Heure - Durée ; Type ; Dernière MAJ"
+            + "Format: Reservation name ; Domain ; Resource ; Description ; Time - Duration ; Type ; Last update"
             + "</span></center></html>",
             SwingConstants.CENTER);
         hint.setFont(new Font("Tahoma", Font.PLAIN, 13));
@@ -165,13 +165,13 @@ public class HomePanel extends JPanel {
                         if (f.getName().toLowerCase().endsWith(".csv")) {
                             chargerCSV(f);
                         } else {
-                            setStatus("❌ Fichier refusé : ce n'est pas un .csv", Color.RED);
+                            setStatus("❌ File rejected: not a .csv file", Color.RED);
                         }
                     }
                     d.dropComplete(true);
                 } catch (Exception ex) {
                     d.dropComplete(false);
-                    setStatus("❌ Erreur drop : " + ex.getMessage(), Color.RED);
+                    setStatus("❌ Drop error : " + ex.getMessage(), Color.RED);
                 }
             }
         }, true);
@@ -191,7 +191,7 @@ public class HomePanel extends JPanel {
     private void openChooser() {
         JFileChooser fc = new JFileChooser();
         fc.setFileFilter(new FileNameExtensionFilter("Fichiers CSV (*.csv)", "csv"));
-        fc.setDialogTitle("Ouvrir un fichier CSV");
+        fc.setDialogTitle("Open a CSV file");
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
             chargerCSV(fc.getSelectedFile());
     }
@@ -273,14 +273,14 @@ public class HomePanel extends JPanel {
             }
 
         } catch (IOException ex) {
-            setStatus("❌ Erreur lecture : " + ex.getMessage(), Color.RED);
+            setStatus("❌ Read error : " + ex.getMessage(), Color.RED);
             return;
         }
 
         String msg = String.format(
-            "✅ Import terminé — %d utilisateur(s), %d ressource(s), %d réservation(s)",
+            "✅ Import complete — %d user(s), %d resource(s), %d reservation(s)",
             nbUsers, nbRess, nbReserv);
-        if (nbErreurs > 0) msg += String.format(" — ⚠️ %d ligne(s) ignorée(s)", nbErreurs);
+        if (nbErreurs > 0) msg += String.format(" — ⚠️ %d line(s) skipped", nbErreurs);
         setStatus(msg, nbErreurs == 0 ? new Color(0, 130, 0) : new Color(170, 90, 0));
     }
 
@@ -355,7 +355,7 @@ public class HomePanel extends JPanel {
         JFileChooser fc = new JFileChooser();
         fc.setSelectedFile(new File("export_gmi.csv"));
         fc.setFileFilter(new FileNameExtensionFilter("Fichiers CSV (*.csv)", "csv"));
-        fc.setDialogTitle("Enregistrer le CSV");
+        fc.setDialogTitle("Save CSV");
         if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
         File dest = fc.getSelectedFile();
@@ -388,16 +388,16 @@ public class HomePanel extends JPanel {
                     maj);
             }
 
-            setStatus("💾 Export réussi → " + dest.getAbsolutePath(), new Color(0, 130, 0));
+            setStatus("💾 Export successful → " + dest.getAbsolutePath(), new Color(0, 130, 0));
             JOptionPane.showMessageDialog(this,
-                    "Export réussi !\n" + dest.getAbsolutePath(),
+                    "Export successful!\n" + dest.getAbsolutePath(),
                     "Export CSV", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (IOException ex) {
             setStatus("❌ Erreur export : " + ex.getMessage(), Color.RED);
             JOptionPane.showMessageDialog(this,
-                    "Erreur lors de l'export :\n" + ex.getMessage(),
-                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                    "Export error:\n" + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

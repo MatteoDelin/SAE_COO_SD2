@@ -61,7 +61,7 @@ public class MainWindow implements ActionListener {
     // -----------------------------------------------------------------------
     public MainWindow() {
 
-        frame = new JFrame("GMI – Gestion des Ressources");
+        frame = new JFrame("GMI – Resource Management");
         frame.setBounds(100, 100, 900, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -72,13 +72,13 @@ public class MainWindow implements ActionListener {
         JMenu homeMenu = new JMenu("🏠 Home");
         menuBar.add(homeMenu);
 
-        homeItem = new JMenuItem("Retour à l'accueil");
+        homeItem = new JMenuItem("Back to Home");
         homeItem.addActionListener(this);
         homeMenu.add(homeItem);
 
         homeMenu.add(new JSeparator());
 
-        JMenuItem homeExport = new JMenuItem("Exporter CSV…");
+        JMenuItem homeExport = new JMenuItem("Export CSV…");
         homeExport.addActionListener(ev -> {
             // Ouvre l'accueil positionné sur le HomePanel puis lance l'export
             HomePanel hp = new HomePanel();
@@ -97,7 +97,7 @@ public class MainWindow implements ActionListener {
         userPrint  = new JMenuItem("Print");    userPrint.addActionListener(this);    userMenu.add(userPrint);
 
         // ===== RESSOURCES MENU =====
-        JMenu ressourcesMenu = new JMenu("Ressources");
+        JMenu ressourcesMenu = new JMenu("Resources");
         menuBar.add(ressourcesMenu);
 
         ressourceCreate = new JMenuItem("Create"); ressourceCreate.addActionListener(this); ressourcesMenu.add(ressourceCreate);
@@ -113,6 +113,28 @@ public class MainWindow implements ActionListener {
         reservationModify = new JMenuItem("Modify"); reservationModify.addActionListener(this); reservationMenu.add(reservationModify);
         reservationDelete = new JMenuItem("Delete"); reservationDelete.addActionListener(this); reservationMenu.add(reservationDelete);
         reservationPrint  = new JMenuItem("Print");  reservationPrint.addActionListener(this);  reservationMenu.add(reservationPrint);
+
+        // ===== CHARTS MENU =====
+        JMenu chartsMenu = new JMenu("📊 Charts");
+        menuBar.add(chartsMenu);
+
+        JMenuItem cTop5     = new JMenuItem("Top 5 Borrowed Resources");
+        JMenuItem cTopUser  = new JMenuItem("Most Active Users");
+        JMenuItem cPropDom  = new JMenuItem("Avg Duration per Domain");
+        JMenuItem cPeriode  = new JMenuItem("Rate over a Period");
+        JMenuItem cDomaine  = new JMenuItem("Rate for a Domain");
+        JMenuItem cEvol     = new JMenuItem("Rate Evolution over Time");
+
+        cTop5   .addActionListener(ev -> showPanel(new TopRessourcesChart()));
+        cTopUser.addActionListener(ev -> showPanel(new TopUserChart()));
+        cPropDom.addActionListener(ev -> showPanel(new DureeMoyenneDomaineChart()));
+        cPeriode.addActionListener(ev -> showPanel(new TauxEmpruntPeriodeChart()));
+        cDomaine.addActionListener(ev -> showPanel(new TauxEmpruntDomaineChart()));
+        cEvol   .addActionListener(ev -> showPanel(new EvolutionTauxChart()));
+
+        chartsMenu.add(cTop5); chartsMenu.add(cTopUser); chartsMenu.add(cPropDom);
+        chartsMenu.addSeparator();
+        chartsMenu.add(cPeriode); chartsMenu.add(cDomaine); chartsMenu.add(cEvol);
 
         // ── Affichage initial : panneau d'accueil ──────────────────────────
         frame.setContentPane(new HomePanel());
@@ -222,19 +244,18 @@ public class MainWindow implements ActionListener {
         p.getCreateButton().addActionListener(ev -> {
             String nom = p.getTextUser().getText().trim();
             if (nom.isEmpty() || nom.equals("Enter user name")) {
-                showError("Veuillez saisir un nom d'utilisateur.");
+                showError("Please enter a user name.");
                 return;
             }
             if (Utilisateur.print_user(nom) != null) {
-                showError("L'utilisateur \"" + nom + "\" existe déjà.");
+                showError("User " + nom + " already exists.");
                 return;
             }
             new Utilisateur(nom);
-            showInfo("Utilisateur \"" + nom + "\" créé avec succès.");
-            p.getTextUser().setText("Enter user name");
+            showInfo("User " + nom + " created successfully.");
+            p.getTextUser().setText("Enter user name"); p.getTextUser().setForeground(java.awt.Color.GRAY); // reset placeholder
         });
 
-        p.getCancelButton().addActionListener(ev -> frame.setContentPane(new javax.swing.JPanel()));
     }
 
     /** Remplit le JComboBox de ModifieUser avec les utilisateurs existants */
@@ -258,38 +279,36 @@ public class MainWindow implements ActionListener {
             String ancien = (String) p.getListUser().getSelectedItem();
             String nouveau = p.getTxtNewName().getText().trim();
             if (ancien == null || nouveau.isEmpty() || nouveau.equals("New name")) {
-                showError("Sélectionnez un utilisateur et saisissez un nouveau nom.");
+                showError("Select a user and enter a new name.");
                 return;
             }
             Utilisateur u = Utilisateur.print_user(ancien);
-            if (u == null) { showError("Utilisateur introuvable."); return; }
+            if (u == null) { showError("User not found."); return; }
             u.setNom(nouveau);
-            showInfo("Utilisateur renommé en \"" + nouveau + "\".");
+            showInfo("Utilisateur renamed to \"" + nouveau + "\".");
             refreshUserCombo(p);
         });
 
-        p.getCancelButton().addActionListener(ev -> frame.setContentPane(new javax.swing.JPanel()));
     }
 
     private void wireDeleteUser(DeleteUser p) {
         p.getDeleteButton().addActionListener(ev -> {
             String nom = (String) p.getListUser().getSelectedItem();
-            if (nom == null) { showError("Sélectionnez un utilisateur."); return; }
+            if (nom == null) { showError("Select a user."); return; }
             int confirm = JOptionPane.showConfirmDialog(frame,
-                    "Supprimer l'utilisateur \"" + nom + "\" ?", "Confirmation",
+                    "Delete user \"" + nom + "\" ?", "Confirm",
                     JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 Utilisateur.delete_user(nom);
-                showInfo("Utilisateur \"" + nom + "\" supprimé.");
+                showInfo("User \"" + nom + "\" deleted.");
                 refreshUserCombo(p);
             }
         });
 
-        p.getCancelButton().addActionListener(ev -> frame.setContentPane(new javax.swing.JPanel()));
     }
 
     private void wirePrintUser(PrintUser p) {
-        String[] colonnes = {"Nom"};
+        String[] colonnes = {"Name"};
         String[][] data = new String[Utilisateur.liste_utilisateur.size()][1];
         for (int i = 0; i < Utilisateur.liste_utilisateur.size(); i++) {
             data[i][0] = Utilisateur.liste_utilisateur.get(i).getNom();
@@ -308,22 +327,21 @@ public class MainWindow implements ActionListener {
             String desc = p.getTxtDescription().getText().trim();
             String dom  = p.getCBDomaine().getEditor().getItem().toString().trim();
 
-            if (nom.isEmpty() || nom.equals("Nom de la ressource") || nom.equals("Ressource name")) {
-                showError("Veuillez saisir un nom de ressource."); return;
+            if (nom.isEmpty() || nom.equals("Ressource name")) {
+                showError("Please enter a resource name."); return;
             }
             if (Ressources.print_user(nom) != null) {
-                showError("La ressource \"" + nom + "\" existe déjà."); return;
+                showError("Resource " + nom + " already exists."); return;
             }
 
             new Ressources(nom,
-                           desc.equals("Description (optionnel)") || desc.equals("Description") ? "" : desc,
+                           desc.equals("Description") ? "" : desc,
                            dom, new Date());
-            showInfo("Ressource \"" + nom + "\" créée avec succès.");
-            p.getTextName().setText("Nom de la ressource");
-            p.getTxtDescription().setText("Description (optionnel)");
+            showInfo("");
+            p.getTextName().setText("Ressource name"); p.getTextName().setForeground(java.awt.Color.GRAY);
+            p.getTxtDescription().setText("Description"); p.getTxtDescription().setForeground(java.awt.Color.GRAY);
         });
 
-        p.getCancelButton().addActionListener(ev -> showHome());
     }
 
     private void refreshRessourceCombo(ModifieRessources p) {
@@ -341,57 +359,55 @@ public class MainWindow implements ActionListener {
     private void wireModifieRessources(ModifieRessources p) {
         p.getCheckButton().addActionListener(ev -> {
             String nom = (String) p.getListRessource().getSelectedItem();
-            if (nom == null) { showError("Sélectionnez une ressource."); return; }
+            if (nom == null) { showError("Select a resource."); return; }
             Ressources r = Ressources.print_user(nom);
-            if (r == null) { showError("Ressource introuvable."); return; }
+            if (r == null) { showError("Resource not found."); return; }
             p.unlockEdit(r.getNom(), r.getDescription(), r.getDomaine());
         });
 
         p.getModifyButton().addActionListener(ev -> {
             String ancien       = (String) p.getListRessource().getSelectedItem();
-            if (ancien == null) { showError("Sélectionnez une ressource."); return; }
+            if (ancien == null) { showError("Select a resource."); return; }
             Ressources r = Ressources.print_user(ancien);
-            if (r == null) { showError("Ressource introuvable."); return; }
+            if (r == null) { showError("Resource not found."); return; }
 
             String nouveauNom   = p.getTxtNom().getText().trim();
             String nouvelleDesc = p.getTxtDescription().getText().trim();
             String nouveauDom   = p.getCBDomaine().getEditor().getItem().toString().trim();
 
-            if (nouveauNom.isEmpty()) { showError("Le nom ne peut pas être vide."); return; }
+            if (nouveauNom.isEmpty()) { showError("Name cannot be empty."); return; }
             if (!nouveauNom.equals(ancien) && Ressources.print_user(nouveauNom) != null) {
-                showError("Une ressource nommée \"" + nouveauNom + "\" existe déjà."); return;
+                showError("A resource named " + nouveauNom + " already exists."); return;
             }
 
             r.setNom(nouveauNom);
             r.setDescription(nouvelleDesc);
             r.setDomaine(nouveauDom);
             r.setLast_maj(new Date());
-            showInfo("Ressource modifiée avec succès.");
+            showInfo("Resource modified successfully.");
             refreshRessourceCombo(p);
         });
 
-        p.getCancelButton().addActionListener(ev -> showHome());
     }
 
     private void wireDeleteRessources(DeleteRessources p) {
         p.getDeleteButton().addActionListener(ev -> {
             String nom = (String) p.getCBDomaine().getSelectedItem();
-            if (nom == null) { showError("Sélectionnez une ressource."); return; }
+            if (nom == null) { showError("Select a resource."); return; }
             int confirm = JOptionPane.showConfirmDialog(frame,
-                    "Supprimer la ressource \"" + nom + "\" ?", "Confirmation",
+                    "Delete resource \"" + nom + "\" ?", "Confirm",
                     JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 Ressources.delete_user(nom);
-                showInfo("Ressource \"" + nom + "\" supprimée.");
+                showInfo("");
                 refreshRessourceCombo(p);
             }
         });
 
-        p.getCancelButton().addActionListener(ev -> frame.setContentPane(new javax.swing.JPanel()));
     }
 
     private void wirePrintRessources(PrintRessources p) {
-        String[] colonnes = {"Nom", "Description", "Domaine", "Dernière MAJ"};
+        String[] colonnes = {"Name", "Description", "Domain", "Last update"};
         String[][] data = new String[Ressources.liste_ressource.size()][4];
         for (int i = 0; i < Ressources.liste_ressource.size(); i++) {
             Ressources r = Ressources.liste_ressource.get(i);
@@ -419,7 +435,7 @@ public class MainWindow implements ActionListener {
             String dureeStr = p.getTxtDuree().getText().trim();
 
             if (nomUser.isEmpty() || nomRess.isEmpty() || dateD == null) {
-                showError("Remplissez l'utilisateur, la ressource et la date."); return;
+                showError("Please fill in the user, resource and date."); return;
             }
 
             Utilisateur user = Utilisateur.print_user(nomUser);
@@ -429,17 +445,16 @@ public class MainWindow implements ActionListener {
             if (ress == null) ress = new Ressources(nomRess, "", "", new Date());
 
             LocalTime heure = parseHeure(heureStr);
-            if (heure == null) { showError("Format d'heure invalide (HH:mm)."); return; }
+            if (heure == null) { showError("Invalid time format (HH:mm)."); return; }
 
             int duree;
             try { duree = Integer.parseInt(dureeStr); }
-            catch (NumberFormatException ex) { showError("La durée doit être un entier (minutes)."); return; }
+            catch (NumberFormatException ex) { showError("Duration must be an integer (minutes)."); return; }
 
             new Reservations(user, ress, dateD, heure, duree, typeStr.isEmpty() ? "Emprunt" : typeStr);
-            showInfo("Réservation créée avec succès.");
+            showInfo("Reservation created successfully.");
         });
 
-        p.getCancelButton().addActionListener(ev -> showHome());
     }
 
     private void refreshReservationCombos(ModifieReservations p) {
@@ -462,14 +477,14 @@ public class MainWindow implements ActionListener {
             Date   date    = p.getDateChooser().getDate();
 
             if (nomUser == null || nomRess == null || date == null) {
-                showError("Sélectionnez un utilisateur, une ressource et une date.");
+                showError("Select a user, a resource and a date.");
                 return;
             }
 
             Reservations res = Reservations.print_reservation(
                     Reservations.liste_reservations, nomUser, nomRess, date);
             if (res == null) {
-                showError("Aucune réservation trouvée pour ces critères.");
+                showError("No reservation found for these criteria.");
                 return;
             }
 
@@ -486,17 +501,17 @@ public class MainWindow implements ActionListener {
             Date   date    = p.getDateChooser().getDate();
 
             if (nomUser == null || nomRess == null || date == null) {
-                showError("Les critères de recherche sont incomplets."); return;
+                showError("Search criteria are incomplete."); return;
             }
 
             Reservations res = Reservations.print_reservation(
                     Reservations.liste_reservations, nomUser, nomRess, date);
-            if (res == null) { showError("Réservation introuvable."); return; }
+            if (res == null) { showError("Reservation not found."); return; }
 
             // Heure modifiable
             LocalTime nouvelleHeure = parseHeure(p.getTxtHour().getText().trim());
             if (nouvelleHeure == null) {
-                showError("Format d'heure invalide. Utilisez HH:mm."); return;
+                showError("Invalid time format. Use HH:mm."); return;
             }
 
             // Durée modifiable
@@ -504,7 +519,7 @@ public class MainWindow implements ActionListener {
             try {
                 nouvelleDuree = Integer.parseInt(p.getTxtDuree().getText().trim());
             } catch (NumberFormatException ex) {
-                showError("La durée doit être un entier (minutes)."); return;
+                showError("Duration must be an integer (minutes)."); return;
             }
 
             String nouveauType = p.getCBType().getEditor().getItem().toString().trim();
@@ -512,10 +527,9 @@ public class MainWindow implements ActionListener {
             res.setHeure(nouvelleHeure);
             res.setDuree(nouvelleDuree);
             res.setType_emprunt(nouveauType.isEmpty() ? "Emprunt" : nouveauType);
-            showInfo("Réservation modifiée avec succès.");
+            showInfo("Reservation modified successfully.");
         });
 
-        p.getCancelButton().addActionListener(ev -> frame.setContentPane(new javax.swing.JPanel()));
     }
 
     private void wireDeleteReservations(DeleteReservations p) {
@@ -525,28 +539,27 @@ public class MainWindow implements ActionListener {
             Date   date    = p.getDateChooser().getDate();
 
             if (nomUser == null || nomRess == null || date == null) {
-                showError("Sélectionnez un utilisateur, une ressource et une date."); return;
+                showError("Select a user, a resource and a date."); return;
             }
 
             Reservations res = Reservations.print_reservation(
                     Reservations.liste_reservations, nomUser, nomRess, date);
-            if (res == null) { showError("Réservation introuvable."); return; }
+            if (res == null) { showError("Reservation not found."); return; }
 
             int confirm = JOptionPane.showConfirmDialog(frame,
-                    "Supprimer la réservation de \"" + nomUser
+                    "Delete reservation for \"" + nomUser
                     + "\" pour \"" + nomRess + "\" ?",
-                    "Confirmation", JOptionPane.YES_NO_OPTION);
+                    "Confirm", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 Reservations.liste_reservations.remove(res);
-                showInfo("Réservation supprimée.");
+                showInfo("Reservation deleted.");
             }
         });
 
-        p.getCancelButton().addActionListener(ev -> frame.setContentPane(new javax.swing.JPanel()));
     }
 
     private void wirePrintReservations(PrintReservations p) {
-        String[] colonnes = {"Utilisateur", "Ressource", "Date", "Heure", "Durée", "Type"};
+        String[] colonnes = {"User", "Resource", "Date", "Time", "Duration", "Type"};
         String[][] data = new String[Reservations.liste_reservations.size()][6];
         for (int i = 0; i < Reservations.liste_reservations.size(); i++) {
             Reservations r = Reservations.liste_reservations.get(i);
@@ -594,10 +607,10 @@ public class MainWindow implements ActionListener {
     }
 
     private void showError(String msg) {
-        JOptionPane.showMessageDialog(frame, msg, "Erreur", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     private void showInfo(String msg) {
-        JOptionPane.showMessageDialog(frame, msg, "Succès", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(frame, msg, "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 }

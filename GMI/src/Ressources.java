@@ -14,53 +14,22 @@ public class Ressources {
 	    liste_ressource.add(this);
 	}
 	
-	public String getNom() {
-		return nom;
-	}
+	public String getNom()                   { return nom; }
+	public void setNom(String nom)           { this.nom = nom; }
+	public String getDescription()           { return description; }
+	public void setDescription(String d)     { this.description = d; }
+	public String getDomaine()               { return domaine; }
+	public void setDomaine(String domaine)   { this.domaine = domaine; }
+	public Date getLast_maj()                { return last_maj; }
+	public void setLast_maj(Date last_maj)   { this.last_maj = last_maj; }
 
-	public void setNom(String nom) {
-		this.nom = nom;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getDomaine() {
-		return domaine;
-	}
-
-	public void setDomaine(String domaine) {
-		this.domaine = domaine;
-	}
-
-	public Date getLast_maj() {
-		return last_maj;
-	}
-
-	public void setLast_maj(Date last_maj) {
-		this.last_maj = last_maj;
-	}
-	
 	static Ressources print_user(String nom) {
-		for (Ressources e:liste_ressource){
-			if (e.getNom().equals(nom)) {
-				return e;
-			}
-		}
+		for (Ressources e : liste_ressource)
+			if (e.getNom().equals(nom)) return e;
 		return null;
 	}
-	
-	static void delete_user(String nom) {
-		for (Ressources e:liste_ressource){
-			if (e.getNom().equals(nom)) {
-				liste_ressource.remove(e);
-			}
-		}
-	}
 
+	static void delete_user(String nom) {
+		liste_ressource.removeIf(e -> e.getNom().equals(nom));
+	}
 }

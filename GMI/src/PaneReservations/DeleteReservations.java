@@ -11,24 +11,17 @@ import com.toedter.calendar.JDateChooser;
 import net.miginfocom.swing.MigLayout;
 import java.awt.FlowLayout;
 
-/**
- * Panneau de suppression d'une réservation.
- * Identification : Utilisateur + Ressource + Date de début (sans heure).
- */
 public class DeleteReservations extends JPanel {
 
     private static final long serialVersionUID = 1L;
-
     private JComboBox<String> CBUser;
     private JComboBox<String> CBRessources;
     private JDateChooser      dateChooser;
     private JButton           deleteButton;
-    private JButton           cancelButton;
 
     public DeleteReservations() {
-        setLayout(new MigLayout("", "[grow]", "[51px,grow][][grow][60px]"));
+        setLayout(new MigLayout("", "[grow]", "[51px,grow][][grow]"));
 
-        // ── Titre ──────────────────────────────────────────────────────────
         JPanel panelTitre = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         JTextField title = new JTextField("Delete Reservation");
         title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -37,50 +30,27 @@ public class DeleteReservations extends JPanel {
         panelTitre.add(title);
         add(panelTitre, "flowx, cell 0 0, growx, aligny top");
 
-        // ── Critères d'identification ──────────────────────────────────────
         JPanel panelCriteres = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
-
-        JLabel lUser = new JLabel("Utilisateur :");
-        lUser.setFont(new Font("Tahoma", Font.BOLD, 14));
-        panelCriteres.add(lUser);
-        CBUser = new JComboBox<>(); CBUser.setEditable(true);
-        panelCriteres.add(CBUser);
-
-        JLabel lRess = new JLabel("Ressource :");
-        lRess.setFont(new Font("Tahoma", Font.BOLD, 14));
-        panelCriteres.add(lRess);
-        CBRessources = new JComboBox<>(); CBRessources.setEditable(true);
-        panelCriteres.add(CBRessources);
-
-        JLabel lDate = new JLabel("Date de début :");
-        lDate.setFont(new Font("Tahoma", Font.BOLD, 14));
-        panelCriteres.add(lDate);
+        JLabel lUser = new JLabel("User:"); lUser.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lUser);
+        CBUser = new JComboBox<>(); CBUser.setEditable(true); panelCriteres.add(CBUser);
+        JLabel lRess = new JLabel("Resource:"); lRess.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lRess);
+        CBRessources = new JComboBox<>(); CBRessources.setEditable(true); panelCriteres.add(CBRessources);
+        JLabel lDate = new JLabel("Start date:"); lDate.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lDate);
         dateChooser = new JDateChooser();
         dateChooser.setFont(new Font("Tahoma", Font.PLAIN, 14));
         dateChooser.setDateFormatString("dd/MM/yyyy");
         panelCriteres.add(dateChooser);
-
         add(panelCriteres, "flowx, cell 0 1, growx");
 
-        // ── Bouton Delete ──────────────────────────────────────────────────
         JPanel panelDelete = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         deleteButton = new JButton("🗑️  Delete");
         deleteButton.setFont(new Font("Tahoma", Font.PLAIN, 22));
         panelDelete.add(deleteButton);
         add(panelDelete, "flowx, cell 0 2, grow");
-
-        // ── Bouton Cancel ──────────────────────────────────────────────────
-        JPanel panelCancel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-        cancelButton = new JButton("Cancel");
-        cancelButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        panelCancel.add(cancelButton);
-        add(panelCancel, "flowx, cell 0 3, alignx right, growy");
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────
     public JComboBox<String> getCBUser()       { return CBUser; }
     public JComboBox<String> getCBRessources() { return CBRessources; }
     public JDateChooser      getDateChooser()  { return dateChooser; }
     public JButton           getDeleteButton() { return deleteButton; }
-    public JButton           getCancelButton() { return cancelButton; }
 }
