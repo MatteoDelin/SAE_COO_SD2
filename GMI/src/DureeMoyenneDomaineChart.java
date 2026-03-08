@@ -114,8 +114,8 @@ public class DureeMoyenneDomaineChart extends JPanel {
                 // Valeur durée moyenne (droite de la barre)
                 int avgMin = (int) Math.round(avg);
                 String valLbl = avgMin >= 60
-                        ? String.format("%dh%02d  (%d resa)", avgMin / 60, avgMin % 60, count)
-                        : String.format("%d min  (%d resa)", avgMin, count);
+                        ? String.format("%dh%02d  (%d reserv)", avgMin / 60, avgMin % 60, count)
+                        : String.format("%d min  (%d reserv)", avgMin, count);
                 g2.setFont(new Font("Tahoma", Font.PLAIN, 11));
                 g2.setColor(new Color(80, 80, 80));
                 g2.drawString(valLbl, padL + barW + 8, y + barH / 2 + 4);
