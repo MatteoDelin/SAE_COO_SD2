@@ -1,15 +1,20 @@
+package PaneCharts;
+
+import model.Reservations;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.HashMap;
 import com.toedter.calendar.JDateChooser;
 import net.miginfocom.swing.MigLayout;
 
+/**
+ * Graphique "Taux de réservation sur une période" (barres empilées par mois).
+ * L'utilisateur choisit une plage From/To et clique Apply.
+ * Chaque barre est découpée par type (Emprunt / Cours / Maintenance).
+ */
 public class TauxEmpruntPeriodeChart extends JPanel {
     private static final long serialVersionUID = 1L;
 
@@ -18,9 +23,9 @@ public class TauxEmpruntPeriodeChart extends JPanel {
         new Color(66,133,244), new Color(52,168,83), new Color(234,67,53)
     };
 
-    private final JDateChooser dateFrom = new JDateChooser();
-    private final JDateChooser dateTo   = new JDateChooser();
-    private final StackedBarChart chart = new StackedBarChart();
+    private final JDateChooser    dateFrom = new JDateChooser();
+    private final JDateChooser    dateTo   = new JDateChooser();
+    private final StackedBarChart chart    = new StackedBarChart();
 
     public TauxEmpruntPeriodeChart() {
         setLayout(new MigLayout("insets 10", "[grow]", "[40!][40!][grow][30!]"));
@@ -30,7 +35,7 @@ public class TauxEmpruntPeriodeChart extends JPanel {
         title.setForeground(new Color(40, 70, 130));
         add(title, "cell 0 0, growx");
 
-        // ── Controls ────────────────────────────────────────────────────────
+        // Barre de contrôle
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 4));
         controls.setOpaque(false);
         dateFrom.setDateFormatString("dd/MM/yyyy");
@@ -39,18 +44,19 @@ public class TauxEmpruntPeriodeChart extends JPanel {
         dateTo.setPreferredSize(new Dimension(130, 28));
         JButton btn = new JButton("Apply");
         btn.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        btn.addActionListener(e -> {
-            chart.setRange(dateFrom.getDate(), dateTo.getDate());
-            chart.repaint();
+        btn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                chart.setRange(dateFrom.getDate(), dateTo.getDate());
+                chart.repaint();
+            }
         });
         controls.add(new JLabel("From:")); controls.add(dateFrom);
         controls.add(new JLabel("To:"));   controls.add(dateTo);
         controls.add(btn);
         add(controls, "cell 0 1, growx");
-
         add(chart, "cell 0 2, grow");
 
-        // ── Legend ───────────────────────────────────────────────────────────
+        // Légende des couleurs
         JPanel legend = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 2));
         legend.setOpaque(false);
         for (int i = 0; i < TYPES.length; i++) {
@@ -62,8 +68,12 @@ public class TauxEmpruntPeriodeChart extends JPanel {
         add(legend, "cell 0 3, growx");
     }
 
-    // ── Inner stacked bar chart ──────────────────────────────────────────────
+    // -------------------------------------------------------------------------
+    // Composant graphique interne
+    // -------------------------------------------------------------------------
+
     private static class StackedBarChart extends JPanel {
+
         private static final String[] TYPES  = {"Emprunt", "Cours", "Maintenance"};
         private static final Color[]  COLORS = {
             new Color(66,133,244), new Color(52,168,83), new Color(234,67,53)
@@ -81,19 +91,36 @@ public class TauxEmpruntPeriodeChart extends JPanel {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Group by year-month AND type
-            // monthly : "2021-09" -> { "Emprunt"->5, "Cours"->2, ... }
-            Map<String, Map<String, Integer>> monthly = new TreeMap<>();
-            for (Reservations r : Reservations.liste_reservations) {
+            // --- Agrégation : clé "AAAA-MM" → type → count ---
+            // On stocke les clés dans une ArrayList séparée pour pouvoir les trier
+            ArrayList<String> keys = new ArrayList<String>();
+            HashMap<String, HashMap<String, Integer>> monthly = new HashMap<String, HashMap<String, Integer>>();
+
+            for (int i = 0; i < Reservations.liste_reservations.size(); i++) {
+                Reservations r = Reservations.liste_reservations.get(i);
                 Date d = r.getDate();
                 if (d == null) continue;
                 if (from != null && d.before(from)) continue;
                 if (to   != null && d.after(to))   continue;
-                Calendar c = Calendar.getInstance(); c.setTime(d);
-                String key = String.format("%04d-%02d", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1);
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(d);
+                String key = cal.get(Calendar.YEAR) + "-" + String.format("%02d", cal.get(Calendar.MONTH) + 1);
+
                 String type = r.getType_emprunt();
                 if (type == null || type.trim().isEmpty()) type = "Emprunt";
-                monthly.computeIfAbsent(key, k -> new LinkedHashMap<>()).merge(type, 1, Integer::sum);
+
+                // Créer la map du mois si elle n'existe pas encore
+                if (!monthly.containsKey(key)) {
+                    monthly.put(key, new HashMap<String, Integer>());
+                    keys.add(key); // On note l'ordre d'apparition
+                }
+                HashMap<String, Integer> typeMap = monthly.get(key);
+                if (typeMap.containsKey(type)) {
+                    typeMap.put(type, typeMap.get(type) + 1);
+                } else {
+                    typeMap.put(type, 1);
+                }
             }
 
             if (monthly.isEmpty()) {
@@ -106,43 +133,67 @@ public class TauxEmpruntPeriodeChart extends JPanel {
                 return;
             }
 
-            List<Map.Entry<String, Map<String, Integer>>> entries = new ArrayList<>(monthly.entrySet());
-            int n = entries.size();
+            // Tri chronologique des clés "AAAA-MM" (tri alphabétique = tri chronologique)
+            for (int i = 0; i < keys.size() - 1; i++) {
+                for (int j = 0; j < keys.size() - 1 - i; j++) {
+                    if (keys.get(j).compareTo(keys.get(j + 1)) > 0) {
+                        String tmp = keys.get(j);
+                        keys.set(j, keys.get(j + 1));
+                        keys.set(j + 1, tmp);
+                    }
+                }
+            }
 
-            // Max total per month (for Y axis)
+            // Calcul du total maximal par mois (pour calibrer l'axe Y)
             int maxTotal = 1;
-            for (Map.Entry<String, Map<String, Integer>> e : entries) {
-                int total = e.getValue().values().stream().mapToInt(Integer::intValue).sum();
+            for (int i = 0; i < keys.size(); i++) {
+                HashMap<String, Integer> typeMap = monthly.get(keys.get(i));
+                int total = 0;
+                for (int val : typeMap.values()) total += val;
                 if (total > maxTotal) maxTotal = total;
             }
 
+            int n = keys.size();
             int W = getWidth(), H = getHeight();
-            int padL = 50, padR = 20, padT = 20, padB = 50;
-            int chartW = W - padL - padR, chartH = H - padT - padB;
-            int barW = Math.max(4, chartW / n - 4);
 
-            // Axes
-            g2.setColor(new Color(180,180,180));
+            // Padding bas dynamique pour les labels "AAAA-MM" à 45°
+            Font labelFont = new Font("Tahoma", Font.PLAIN, 10);
+            g2.setFont(labelFont);
+            int sampleW = g2.getFontMetrics().stringWidth("2021-09");
+            int padB = (int) (sampleW * Math.sin(Math.PI / 4)) + 20;
+
+            int padL = 50, padR = 20, padT = 20;
+            int chartW = W - padL - padR;
+            int chartH = H - padT - padB;
+            int barW   = Math.max(4, chartW / n - 4);
+
+            // --- Axes ---
+            g2.setColor(new Color(180, 180, 180));
             g2.drawLine(padL, padT, padL, padT + chartH);
             g2.drawLine(padL, padT + chartH, W - padR, padT + chartH);
 
-            // Y grid
+            // --- Grille Y et ticks ---
             g2.setFont(new Font("Tahoma", Font.PLAIN, 10));
             for (int i = 0; i <= 4; i++) {
                 int y = padT + chartH - i * chartH / 4;
-                g2.setColor(new Color(220,220,220)); g2.drawLine(padL, y, W - padR, y);
-                g2.setColor(Color.GRAY); g2.drawString(String.valueOf(maxTotal * i / 4), padL - 28, y + 4);
+                g2.setColor(new Color(220, 220, 220)); g2.drawLine(padL, y, W - padR, y);
+                g2.setColor(Color.GRAY);
+                String tick = String.valueOf(maxTotal * i / 4);
+                g2.drawString(tick, padL - g2.getFontMetrics().stringWidth(tick) - 4, y + 4);
             }
 
-            // Stacked bars
+            // --- Barres empilées + labels X ---
             for (int i = 0; i < n; i++) {
-                Map.Entry<String, Map<String, Integer>> e = entries.get(i);
-                Map<String, Integer> typeCounts = e.getValue();
-                int x = padL + i * (chartW / n) + 2;
-                int yBase = padT + chartH;
+                String key = keys.get(i);
+                HashMap<String, Integer> typeMap = monthly.get(key);
+                int x     = padL + i * (chartW / n) + 2;
+                int yBase = padT + chartH; // On empile depuis le bas
 
                 for (int t = 0; t < TYPES.length; t++) {
-                    int count = typeCounts.getOrDefault(TYPES[t], 0);
+                    int count = 0;
+                    if (typeMap.containsKey(TYPES[t])) {
+                        count = typeMap.get(TYPES[t]);
+                    }
                     if (count == 0) continue;
                     int segH = (int) ((double) count / maxTotal * chartH);
                     yBase -= segH;
@@ -152,13 +203,13 @@ public class TauxEmpruntPeriodeChart extends JPanel {
                     g2.drawRoundRect(x, yBase, barW, segH, 3, 3);
                 }
 
-                // X label (rotated)
-                g2.setFont(new Font("Tahoma", Font.PLAIN, 9));
+                // Label X en diagonale 45°
+                g2.setFont(labelFont);
                 g2.setColor(Color.DARK_GRAY);
                 Graphics2D gr = (Graphics2D) g2.create();
                 gr.translate(x + barW / 2, padT + chartH + 6);
                 gr.rotate(Math.PI / 4);
-                gr.drawString(e.getKey(), 0, 0);
+                gr.drawString(key, 0, 0);
                 gr.dispose();
             }
         }

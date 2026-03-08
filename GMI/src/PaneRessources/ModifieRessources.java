@@ -42,7 +42,7 @@ public class ModifieRessources extends JPanel {
 
         JPanel panel_5 = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
         add(panel_5, "cell 0 3,grow");
-        panel_5.add(lbl("Name:"));
+        panel_5.add(lbl(Name:));
         txtNom = new JTextField("Name", 15);
         txtNom.setFont(new Font("Dialog", Font.PLAIN, 20));
         txtNom.setEnabled(false);

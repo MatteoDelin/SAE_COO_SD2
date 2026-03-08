@@ -1,3 +1,6 @@
+import model.Utilisateur;
+import model.Ressources;
+import model.Reservations;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -14,30 +17,10 @@ import java.util.List;
 import java.util.regex.*;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * Panneau d'accueil GMI.
- *
- * Format CSV attendu (encodage ISO-8859-1, séparateur ;) :
- *
- *   Ligne d'en-tête (ignorée) :
- *     Réservation au nom de ;Domaines :;Ressource : ;Description :;Heure - Durée :;Type;Dernière mise à jour
- *
- *   Ligne de données :
- *     nom_utilisateur ; domaine ; nom_ressource ; description ; date_heure_duree ; type ; derniere_maj
- *
- *   Champ "Heure - Durée" :
- *     "jeudi 03 mars 2022 09:30:00 - 4 jour(s), 4 heure(s) et 30 minute(s)"
- *
- * À l'import, le parser :
- *   - crée un Utilisateur si inconnu
- *   - crée une Ressource (nom + description + domaine) si inconnue
- *   - crée une Reservation avec date, heure et durée calculée en minutes
- */
 public class HomePanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    // Mois français → numéro
     private static final Map<String, Integer> MOIS = new LinkedHashMap<>();
     static {
         MOIS.put("janvier",1); MOIS.put("février",2); MOIS.put("mars",3);
@@ -46,7 +29,6 @@ public class HomePanel extends JPanel {
         MOIS.put("octobre",10);MOIS.put("novembre",11);MOIS.put("décembre",12);
     }
 
-    // Modèles des trois tables de prévisualisation
     private final DefaultTableModel modelUsers = new DefaultTableModel(
             new String[]{"Nom"}, 0);
     private final DefaultTableModel modelRess = new DefaultTableModel(
@@ -62,16 +44,13 @@ public class HomePanel extends JPanel {
         setBackground(new Color(245, 247, 250));
         setLayout(new MigLayout("insets 20", "[grow]", "[][15][grow][8][]"));
 
-        // ── Titre ──────────────────────────────────────────────────────────
         JLabel titre = new JLabel("GMI – Resource Management", SwingConstants.CENTER);
         titre.setFont(new Font("Tahoma", Font.BOLD, 26));
         titre.setForeground(new Color(40, 70, 130));
         add(titre, "cell 0 0, growx, align center");
 
-        // ── Zone Drag & Drop ───────────────────────────────────────────────
         add(buildDropZone(), "cell 0 1, growx, h 100!");
 
-        // ── Onglets de prévisualisation ────────────────────────────────────
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Tahoma", Font.PLAIN, 13));
         tabs.addTab("👤 Users", buildScrollTable(modelUsers));
@@ -79,7 +58,6 @@ public class HomePanel extends JPanel {
         tabs.addTab("📅 Reservations", buildScrollTable(modelReserv));
         add(tabs, "cell 0 2, grow");
 
-        // ── Barre de statut ────────────────────────────────────────────────
         statusLabel = new JLabel(
                 "No file loaded — drag a CSV or click Browse.",
                 SwingConstants.LEFT);
@@ -87,13 +65,14 @@ public class HomePanel extends JPanel {
         statusLabel.setForeground(Color.GRAY);
         add(statusLabel, "cell 0 3, growx");
 
-        // ── Boutons bas ────────────────────────────────────────────────────
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bar.setOpaque(false);
 
         browseButton = new JButton("📂  Browse…");
         browseButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        browseButton.addActionListener(e -> openChooser());
+        browseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) { openChooser(); }
+        });
         bar.add(browseButton);
 
         exportButton = new JButton("💾  Export CSV");
@@ -102,15 +81,13 @@ public class HomePanel extends JPanel {
         exportButton.setForeground(Color.WHITE);
         exportButton.setOpaque(true);
         exportButton.setBorderPainted(false);
-        exportButton.addActionListener(e -> exporterCSV());
+        exportButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) { exporterCSV(); }
+        });
         bar.add(exportButton);
 
         add(bar, "cell 0 4, growx");
     }
-
-    // ────────────────────────────────────────────────────────────────────────
-    // Construction des sous-composants
-    // ────────────────────────────────────────────────────────────────────────
 
     private JScrollPane buildScrollTable(DefaultTableModel model) {
         JTable t = new JTable(model);
@@ -184,10 +161,6 @@ public class HomePanel extends JPanel {
         zone.setBorder(new DashBorder(new Color(100, 140, 210), 8));
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Import CSV
-    // ────────────────────────────────────────────────────────────────────────
-
     private void openChooser() {
         JFileChooser fc = new JFileChooser();
         fc.setFileFilter(new FileNameExtensionFilter("Fichiers CSV (*.csv)", "csv"));
@@ -197,7 +170,7 @@ public class HomePanel extends JPanel {
     }
 
     private void chargerCSV(File fichier) {
-        // Vider les aperçus
+
         modelUsers.setRowCount(0);
         modelRess.setRowCount(0);
         modelReserv.setRowCount(0);
@@ -214,7 +187,6 @@ public class HomePanel extends JPanel {
                 ligne = ligne.trim();
                 if (ligne.isEmpty()) continue;
 
-                // Ignorer la ligne d'en-tête
                 if (premiereLigne) {
                     premiereLigne = false;
                     if (ligne.startsWith("Réservation") || ligne.startsWith("R")) continue;
@@ -223,20 +195,17 @@ public class HomePanel extends JPanel {
                 String[] cols = ligne.split(";", -1);
                 if (cols.length < 6) { nbErreurs++; continue; }
 
-                // ── Extraction des 7 colonnes ──────────────────────────────
-                String nomUser    = cols[0].trim();   // "mono1"
-                String domaine    = cols[1].trim();   // "PC Courte Duree"
-                String nomRess    = cols[2].trim();   // "PC B CD 1"
-                String descRess   = cols[3].trim();   // "DELL Latitude E5580"
-                String heureDuree = cols[4].trim();   // "mercredi 01 septembre 2021 08:30:00 - 9 heure(s)"
-                String typeEmpr   = cols[5].trim();   // "Emprunt"
-                // cols[6] = dernière MAJ (ignoré pour l'import)
+                String nomUser    = cols[0].trim();
+                String domaine    = cols[1].trim();
+                String nomRess    = cols[2].trim();
+                String descRess   = cols[3].trim();
+                String heureDuree = cols[4].trim();
+                String typeEmpr   = cols[5].trim();
 
                 if (nomUser.isEmpty() || nomRess.isEmpty() || heureDuree.isEmpty()) {
                     nbErreurs++; continue;
                 }
 
-                // ── Parsing du champ "Heure - Durée" ──────────────────────
                 String[] partsHD = heureDuree.split(" - ", 2);
                 if (partsHD.length < 2) { nbErreurs++; continue; }
 
@@ -246,7 +215,6 @@ public class HomePanel extends JPanel {
 
                 if (date == null || heure == null) { nbErreurs++; continue; }
 
-                // ── Créer Utilisateur si inconnu ───────────────────────────
                 Utilisateur user = Utilisateur.print_user(nomUser);
                 if (user == null) {
                     user = new Utilisateur(nomUser);
@@ -254,7 +222,6 @@ public class HomePanel extends JPanel {
                     modelUsers.addRow(new Object[]{nomUser});
                 }
 
-                // ── Créer Ressource si inconnue ────────────────────────────
                 Ressources ress = Ressources.print_user(nomRess);
                 if (ress == null) {
                     ress = new Ressources(nomRess, descRess, domaine, new Date());
@@ -262,7 +229,6 @@ public class HomePanel extends JPanel {
                     modelRess.addRow(new Object[]{nomRess, descRess, domaine});
                 }
 
-                // ── Créer Réservation ──────────────────────────────────────
                 new Reservations(user, ress, date, heure, duree, typeEmpr);
                 nbReserv++;
                 modelReserv.addRow(new Object[]{
@@ -284,17 +250,8 @@ public class HomePanel extends JPanel {
         setStatus(msg, nbErreurs == 0 ? new Color(0, 130, 0) : new Color(170, 90, 0));
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Parsing du champ "Heure - Durée"
-    // Exemple : "mercredi 01 septembre 2021 08:30:00"
-    // ────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Parse la partie date/heure d'une chaîne comme
-     * "mercredi 01 septembre 2021 08:30:00"
-     */
     private Date parseDate(String s) {
-        // Pattern : (jour_semaine) dd mois yyyy HH:mm:ss
+
         Pattern p = Pattern.compile(
             "\\w+\\s+(\\d{1,2})\\s+(\\w+)\\s+(\\d{4})\\s+(\\d{2}):(\\d{2}):(\\d{2})");
         Matcher m = p.matcher(s);
@@ -311,9 +268,6 @@ public class HomePanel extends JPanel {
         } catch (Exception e) { return null; }
     }
 
-    /**
-     * Extrait l'heure (LocalTime) depuis la même chaîne.
-     */
     private LocalTime parseHeure(String s) {
         Pattern p = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})");
         Matcher m = p.matcher(s);
@@ -326,13 +280,6 @@ public class HomePanel extends JPanel {
         } catch (Exception e) { return null; }
     }
 
-    /**
-     * Convertit une expression de durée en nombre de minutes.
-     * Exemples :
-     *   "9 heure(s)"
-     *   "2 semaine(s) et 23 heure(s)"
-     *   "4 jour(s), 4 heure(s) et 30 minute(s)"
-     */
     private int parseDureeMinutes(String s) {
         int total = 0;
         Matcher m;
@@ -346,10 +293,6 @@ public class HomePanel extends JPanel {
         if (m.find()) total += Integer.parseInt(m.group(1));
         return total;
     }
-
-    // ────────────────────────────────────────────────────────────────────────
-    // Export CSV — restitue le même format que le fichier source
-    // ────────────────────────────────────────────────────────────────────────
 
     void exporterCSV() {
         JFileChooser fc = new JFileChooser();
@@ -365,7 +308,6 @@ public class HomePanel extends JPanel {
         try (PrintWriter pw = new PrintWriter(
                 new OutputStreamWriter(new FileOutputStream(dest), "ISO-8859-1"))) {
 
-            // En-tête identique au fichier source
             pw.println("Réservation au nom de ;Domaines :;Ressource : ;Description :;Heure - Durée :;Type;Dernière mise à jour");
 
             DateTimeFormatter fmtH = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -401,17 +343,12 @@ public class HomePanel extends JPanel {
         }
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Utilitaires de formatage
-    // ────────────────────────────────────────────────────────────────────────
-
     private static final String[] JOURS_FR =
         {"dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"};
     private static final String[] MOIS_FR =
         {"","janvier","février","mars","avril","mai","juin",
          "juillet","août","septembre","octobre","novembre","décembre"};
 
-    /** "mercredi 01 septembre 2021 " */
     private String formatDateLong(Date d) {
         if (d == null) return "";
         Calendar c = Calendar.getInstance();
@@ -423,7 +360,6 @@ public class HomePanel extends JPanel {
             c.get(Calendar.YEAR));
     }
 
-    /** "01/09/2021" pour la prévisualisation */
     private String formatDate(Date d) {
         if (d == null) return "";
         Calendar c = Calendar.getInstance();
@@ -434,10 +370,6 @@ public class HomePanel extends JPanel {
             c.get(Calendar.YEAR));
     }
 
-    /**
-     * Convertit un nombre de minutes en texte lisible.
-     * Exemples : 540 → "9 heure(s)"  |  6030 → "4 jour(s), 4 heure(s) et 30 minute(s)"
-     */
     private String formatDureeTexte(int minutes) {
         int semaines = minutes / (7 * 24 * 60); minutes %= (7 * 24 * 60);
         int jours    = minutes / (24 * 60);     minutes %= (24 * 60);
@@ -460,7 +392,6 @@ public class HomePanel extends JPanel {
         return sb.toString();
     }
 
-    /** Échappe une valeur CSV si elle contient un point-virgule. */
     private String csv(String val) {
         if (val == null) return "";
         if (val.contains(";") || val.contains("\""))
@@ -473,7 +404,6 @@ public class HomePanel extends JPanel {
         statusLabel.setForeground(c);
     }
 
-    // ── Bordure en tirets personnalisée ─────────────────────────────────────
     private static class DashBorder extends AbstractBorder {
         private final Color color; private final int radius;
         DashBorder(Color c, int r) { color = c; radius = r; }
@@ -490,7 +420,6 @@ public class HomePanel extends JPanel {
         @Override public Insets getBorderInsets(Component c) { return new Insets(6,6,6,6); }
     }
 
-    // ── Getters ──────────────────────────────────────────────────────────────
     public JButton getExportButton() { return exportButton; }
     public JButton getBrowseButton() { return browseButton; }
 }
