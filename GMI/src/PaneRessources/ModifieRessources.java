@@ -19,7 +19,7 @@ public class ModifieRessources extends JPanel {
 
         JPanel panel = new JPanel();
         add(panel, "cell 0 0,grow");
-        JTextField title = new JTextField("Resource Edit");
+        JTextField title = new JTextField("Ressource Edit");
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setFont(new Font("Tahoma", Font.BOLD, 32));
         title.setEditable(false);
@@ -42,7 +42,7 @@ public class ModifieRessources extends JPanel {
 
         JPanel panel_5 = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
         add(panel_5, "cell 0 3,grow");
-        panel_5.add(lbl(Name:));
+        panel_5.add(lbl("Name :"));
         txtNom = new JTextField("Name", 15);
         txtNom.setFont(new Font("Dialog", Font.PLAIN, 20));
         txtNom.setEnabled(false);

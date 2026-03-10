@@ -17,7 +17,7 @@ public class TopRessourcesChart extends JPanel {
 
     public TopRessourcesChart() {
         setLayout(new MigLayout("insets 10", "[grow]", "[40!][grow]"));
-        JLabel title = new JLabel("Top 5 Most Borrowed Resources", SwingConstants.CENTER);
+        JLabel title = new JLabel("Top 5 Most Borrowed Ressources", SwingConstants.CENTER);
         title.setFont(new Font("Tahoma", Font.BOLD, 18));
         title.setForeground(new Color(40, 70, 130));
         add(title, "cell 0 0, growx");

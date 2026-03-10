@@ -34,7 +34,7 @@ public class HomePanel extends JPanel {
     private final DefaultTableModel modelRess = new DefaultTableModel(
             new String[]{"Name", "Description", "Domain"}, 0);
     private final DefaultTableModel modelReserv = new DefaultTableModel(
-            new String[]{"User", "Resource", "Date", "Time", "Duration (min)", "Type"}, 0);
+            new String[]{"User", "Ressources", "Date", "Time", "Duration (min)", "Type"}, 0);
 
     private JLabel statusLabel;
     private JButton exportButton;
@@ -44,7 +44,7 @@ public class HomePanel extends JPanel {
         setBackground(new Color(245, 247, 250));
         setLayout(new MigLayout("insets 20", "[grow]", "[][15][grow][8][]"));
 
-        JLabel titre = new JLabel("GMI – Resource Management", SwingConstants.CENTER);
+        JLabel titre = new JLabel("GMI – Ressources Management", SwingConstants.CENTER);
         titre.setFont(new Font("Tahoma", Font.BOLD, 26));
         titre.setForeground(new Color(40, 70, 130));
         add(titre, "cell 0 0, growx, align center");
@@ -54,7 +54,7 @@ public class HomePanel extends JPanel {
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Tahoma", Font.PLAIN, 13));
         tabs.addTab("👤 Users", buildScrollTable(modelUsers));
-        tabs.addTab("📦 Resources",   buildScrollTable(modelRess));
+        tabs.addTab("📦 Ressources",   buildScrollTable(modelRess));
         tabs.addTab("📅 Reservations", buildScrollTable(modelReserv));
         add(tabs, "cell 0 2, grow");
 
@@ -108,7 +108,7 @@ public class HomePanel extends JPanel {
             "<html><center>"
             + "🗂️ &nbsp;<b>Drag and drop a CSV file here</b> &nbsp;(or click to browse)<br>"
             + "<span style='font-size:10px;color:#777'>"
-            + "Format: Reservation name ; Domain ; Resource ; Description ; Time - Duration ; Type ; Last update"
+            + "Format: Reservation name ; Domain ; Ressources ; Description ; Time - Duration ; Type ; Last update"
             + "</span></center></html>",
             SwingConstants.CENTER);
         hint.setFont(new Font("Tahoma", Font.PLAIN, 13));
@@ -244,7 +244,7 @@ public class HomePanel extends JPanel {
         }
 
         String msg = String.format(
-            "✅ Import complete — %d user(s), %d resource(s), %d reservation(s)",
+            "✅ Import complete — %d user(s), %d ressource(s), %d reservation(s)",
             nbUsers, nbRess, nbReserv);
         if (nbErreurs > 0) msg += String.format(" — ⚠️ %d line(s) skipped", nbErreurs);
         setStatus(msg, nbErreurs == 0 ? new Color(0, 130, 0) : new Color(170, 90, 0));
@@ -308,7 +308,7 @@ public class HomePanel extends JPanel {
         try (PrintWriter pw = new PrintWriter(
                 new OutputStreamWriter(new FileOutputStream(dest), "ISO-8859-1"))) {
 
-            pw.println("Réservation au nom de ;Domaines :;Ressource : ;Description :;Heure - Durée :;Type;Dernière mise à jour");
+            pw.println("Réservation au nom de ;Domaines :;Ressources : ;Description :;Heure - Durée :;Type;Dernière mise à jour");
 
             DateTimeFormatter fmtH = DateTimeFormatter.ofPattern("HH:mm:ss");
 

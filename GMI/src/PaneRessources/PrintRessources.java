@@ -24,7 +24,7 @@ public class PrintRessources extends JPanel {
 
         txtAllUser = new JTextField();
         panel.add(txtAllUser);
-        txtAllUser.setText("All Ressource");
+        txtAllUser.setText("All Ressources");
         txtAllUser.setHorizontalAlignment(SwingConstants.CENTER);
         txtAllUser.setFont(new Font("Tahoma", Font.BOLD, 32));
         txtAllUser.setColumns(10);

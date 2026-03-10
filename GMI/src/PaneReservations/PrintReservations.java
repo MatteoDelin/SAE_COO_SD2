@@ -21,7 +21,7 @@ public class PrintReservations extends JPanel {
         JPanel panel = new JPanel();
         add(panel, "cell 0 0,grow");
         panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        txtAllReservation = new JTextField("All Reservation");
+        txtAllReservation = new JTextField("All Reservations");
         txtAllReservation.setHorizontalAlignment(SwingConstants.CENTER);
         txtAllReservation.setFont(new Font("Tahoma", Font.BOLD, 32));
         txtAllReservation.setColumns(10);

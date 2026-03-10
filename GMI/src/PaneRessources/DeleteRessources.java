@@ -21,7 +21,7 @@ public class DeleteRessources extends JPanel {
 
         JPanel panel = new JPanel();
         add(panel, "flowx,cell 0 0,grow");
-        title = new JTextField("Delete Resource");
+        title = new JTextField("Delete Ressource");
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setFont(new Font("Tahoma", Font.BOLD, 32));
         title.setColumns(10);

@@ -23,7 +23,7 @@ public class PrintUser extends JPanel {
 
         txtAllUser = new JTextField();
         panel.add(txtAllUser);
-        txtAllUser.setText("All User");
+        txtAllUser.setText("All Users");
         txtAllUser.setHorizontalAlignment(SwingConstants.CENTER);
         txtAllUser.setFont(new Font("Tahoma", Font.BOLD, 32));
         txtAllUser.setColumns(10);

@@ -30,7 +30,7 @@ public class ModifieReservations extends JPanel {
 
         JPanel panelRecherche = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
         panelRecherche.add(lbl("User:")); CBUser = new JComboBox<>(); CBUser.setEditable(true); panelRecherche.add(CBUser);
-        panelRecherche.add(lbl("Resource:")); CBRessources = new JComboBox<>(); CBRessources.setEditable(true); panelRecherche.add(CBRessources);
+        panelRecherche.add(lbl("Ressource:")); CBRessources = new JComboBox<>(); CBRessources.setEditable(true); panelRecherche.add(CBRessources);
         panelRecherche.add(lbl("Start date:"));
         dateChooser = new JDateChooser();
         dateChooser.setFont(new Font("Tahoma", Font.PLAIN, 14));

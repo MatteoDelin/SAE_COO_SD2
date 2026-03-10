@@ -23,10 +23,10 @@ import model.Ressources;
 import model.Reservations;
 
 /**
- * Fenêtre principale de l'application GMI – Resource Management.
+ * Fenêtre principale de l'application GMI – Ressource Management.
  *
  * Rôle central de cette classe :
- *   1. Créer la fenêtre et la barre de menus (Home, User, Resources, Reservation, Charts).
+ *   1. Créer la fenêtre et la barre de menus (Home, User, Ressources, Reservation, Charts).
  *   2. Réagir aux clics de menu via actionPerformed() pour afficher le bon panneau.
  *   3. "Câbler" les boutons de chaque panneau CRUD aux opérations du modèle
  *      (Utilisateur, Ressources, Reservations).
@@ -67,7 +67,7 @@ public class MainWindow implements ActionListener {
     private JMenuItem userDelete; // Affiche DeleteUser
     private JMenuItem userPrint;  // Affiche PrintUser (tableau récapitulatif)
 
-    // --- Items du menu "Resources" ---
+    // --- Items du menu "Ressources" ---
     private JMenuItem ressourceCreate;
     private JMenuItem ressourceModify;
     private JMenuItem ressourceDelete;
@@ -133,7 +133,7 @@ public class MainWindow implements ActionListener {
     public MainWindow() {
 
         // --- Configuration de la fenêtre ---
-        frame = new JFrame("GMI – Resource Management");
+        frame = new JFrame("GMI – Ressources Management");
         frame.setBounds(100, 100, 900, 600); // Position x=100, y=100, largeur=900, hauteur=600
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Fermer l'application à la croix
 
@@ -179,9 +179,9 @@ public class MainWindow implements ActionListener {
         userPrint  = new JMenuItem("Print");  userPrint.addActionListener(this);  userMenu.add(userPrint);
 
         // =================================================================
-        // Menu "Resources"
+        // Menu "Ressources"
         // =================================================================
-        JMenu ressourcesMenu = new JMenu("Resources");
+        JMenu ressourcesMenu = new JMenu("Ressources");
         menuBar.add(ressourcesMenu);
         ressourceCreate = new JMenuItem("Create"); ressourceCreate.addActionListener(this); ressourcesMenu.add(ressourceCreate);
         ressourceModify = new JMenuItem("Modify"); ressourceModify.addActionListener(this); ressourcesMenu.add(ressourceModify);
@@ -205,7 +205,7 @@ public class MainWindow implements ActionListener {
         menuBar.add(chartsMenu);
 
         // Un JMenuItem par graphique disponible
-        JMenuItem cTop5    = new JMenuItem("Top 5 Borrowed Resources");
+        JMenuItem cTop5    = new JMenuItem("Top 5 Borrowed Ressources");
         JMenuItem cTopUser = new JMenuItem("Most Active Users");
         JMenuItem cPropDom = new JMenuItem("Avg Duration per Domain");
         JMenuItem cPeriode = new JMenuItem("Rate over a Period");
@@ -536,15 +536,15 @@ public class MainWindow implements ActionListener {
 
                 // Validation du nom
                 if (nom.isEmpty() || nom.equals("Ressource name")) {
-                    showError("Please enter a resource name."); return;
+                    showError("Please enter a ressource name."); return;
                 }
                 if (Ressources.print_user(nom) != null) {
-                    showError("Resource " + nom + " already exists."); return;
+                    showError("Ressource " + nom + " already exists."); return;
                 }
 
                 // Création de la ressource (new Date() = date et heure actuelles)
                 new Ressources(nom, desc.equals("Description") ? "" : desc, dom, new Date());
-                showInfo("Resource \"" + nom + "\" created successfully.");
+                showInfo("Ressource \"" + nom + "\" created successfully.");
 
                 // Réinitialisation des champs de saisie
                 p.getTextName().setText("Ressource name");
@@ -594,9 +594,9 @@ public class MainWindow implements ActionListener {
         p.getCheckButton().addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String nom = (String) p.getListRessource().getSelectedItem();
-                if (nom == null) { showError("Select a resource."); return; }
+                if (nom == null) { showError("Select a ressource."); return; }
                 Ressources r = Ressources.print_user(nom);
-                if (r == null) { showError("Resource not found."); return; }
+                if (r == null) { showError("Ressource not found."); return; }
                 // unlockEdit() déverrouille les champs et les pré-remplit avec les valeurs actuelles
                 p.unlockEdit(r.getNom(), r.getDescription(), r.getDomaine());
             }
@@ -606,9 +606,9 @@ public class MainWindow implements ActionListener {
         p.getModifyButton().addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String ancien = (String) p.getListRessource().getSelectedItem();
-                if (ancien == null) { showError("Select a resource."); return; }
+                if (ancien == null) { showError("Select a ressource."); return; }
                 Ressources r = Ressources.print_user(ancien);
-                if (r == null) { showError("Resource not found."); return; }
+                if (r == null) { showError("Ressource not found."); return; }
 
                 String nouveauNom   = p.getTxtNom().getText().trim();
                 String nouvelleDesc = p.getTxtDescription().getText().trim();
@@ -618,7 +618,7 @@ public class MainWindow implements ActionListener {
 
                 // Vérification de doublon uniquement si le nom a changé
                 if (!nouveauNom.equals(ancien) && Ressources.print_user(nouveauNom) != null) {
-                    showError("A resource named " + nouveauNom + " already exists."); return;
+                    showError("A ressource named " + nouveauNom + " already exists."); return;
                 }
 
                 // Application des modifications sur l'objet en mémoire
@@ -627,7 +627,7 @@ public class MainWindow implements ActionListener {
                 r.setDomaine(nouveauDom);
                 r.setLast_maj(new Date()); // Mise à jour de la date de modification
 
-                showInfo("Resource modified successfully.");
+                showInfo("Ressource modified successfully.");
                 refreshRessourceCombo(p); // Mise à jour du combo avec le nouveau nom
             }
         });
@@ -641,12 +641,12 @@ public class MainWindow implements ActionListener {
         p.getDeleteButton().addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String nom = (String) p.getCBDomaine().getSelectedItem();
-                if (nom == null) { showError("Select a resource."); return; }
+                if (nom == null) { showError("Select a ressource."); return; }
                 int choix = JOptionPane.showConfirmDialog(
-                    frame, "Delete resource \"" + nom + "\" ?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    frame, "Delete ressource \"" + nom + "\" ?", "Confirm", JOptionPane.YES_NO_OPTION);
                 if (choix == JOptionPane.YES_OPTION) {
                     Ressources.delete_user(nom);
-                    showInfo("Resource \"" + nom + "\" deleted.");
+                    showInfo("Ressource \"" + nom + "\" deleted.");
                     refreshRessourceCombo(p);
                 }
             }
@@ -701,7 +701,7 @@ public class MainWindow implements ActionListener {
 
                 // Validation des champs obligatoires
                 if (nomUser.isEmpty() || nomRess.isEmpty() || dateD == null) {
-                    showError("Please fill in the user, resource and date."); return;
+                    showError("Please fill in the user, ressource and date."); return;
                 }
 
                 // Si l'utilisateur n'existe pas encore, on le crée automatiquement
@@ -776,7 +776,7 @@ public class MainWindow implements ActionListener {
                 Date   date    = p.getDateChooser().getDate();
 
                 if (nomUser == null || nomRess == null || date == null) {
-                    showError("Select a user, a resource and a date."); return;
+                    showError("Select a user, a ressource and a date."); return;
                 }
 
                 // Recherche de la réservation par les trois critères d'identification
@@ -854,7 +854,7 @@ public class MainWindow implements ActionListener {
                 Date   date    = p.getDateChooser().getDate();
 
                 if (nomUser == null || nomRess == null || date == null) {
-                    showError("Select a user, a resource and a date."); return;
+                    showError("Select a user, a ressource and a date."); return;
                 }
 
                 Reservations res = Reservations.print_reservation(
@@ -880,7 +880,7 @@ public class MainWindow implements ActionListener {
      * @param p Le panneau PrintReservations.
      */
     private void wirePrintReservations(PrintReservations p) {
-        String[] colonnes = {"User", "Resource", "Date", "Time", "Duration", "Type"};
+        String[] colonnes = {"User", "Ressource", "Date", "Time", "Duration", "Type"};
         String[][] data = new String[Reservations.liste_reservations.size()][6];
         for (int i = 0; i < Reservations.liste_reservations.size(); i++) {
             Reservations r = Reservations.liste_reservations.get(i);

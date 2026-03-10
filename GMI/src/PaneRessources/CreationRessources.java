@@ -18,7 +18,7 @@ public class CreationRessources extends JPanel {
 
         JPanel panel = new JPanel();
         add(panel, "flowx,cell 0 0,grow");
-        JTextField title = new JTextField("Resource Creation");
+        JTextField title = new JTextField("Ressource Creation");
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setFont(new Font("Tahoma", Font.BOLD, 31));
         title.setEditable(false);

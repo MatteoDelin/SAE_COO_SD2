@@ -33,7 +33,7 @@ public class DeleteReservations extends JPanel {
         JPanel panelCriteres = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
         JLabel lUser = new JLabel("User:"); lUser.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lUser);
         CBUser = new JComboBox<>(); CBUser.setEditable(true); panelCriteres.add(CBUser);
-        JLabel lRess = new JLabel("Resource:"); lRess.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lRess);
+        JLabel lRess = new JLabel("Ressource:"); lRess.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lRess);
         CBRessources = new JComboBox<>(); CBRessources.setEditable(true); panelCriteres.add(CBRessources);
         JLabel lDate = new JLabel("Start date:"); lDate.setFont(new Font("Tahoma", Font.BOLD, 14)); panelCriteres.add(lDate);
         dateChooser = new JDateChooser();
