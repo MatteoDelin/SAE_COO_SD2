@@ -201,7 +201,7 @@ public class MainWindow implements ActionListener {
         // =================================================================
         // Menu "📊 Charts"
         // =================================================================
-        JMenu chartsMenu = new JMenu("📊 Charts");
+        JMenu chartsMenu = new JMenu("Charts");
         menuBar.add(chartsMenu);
 
         // Un JMenuItem par graphique disponible
