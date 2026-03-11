@@ -24,29 +24,6 @@ import model.Reservations;
 
 /**
  * Fenêtre principale de l'application GMI – Ressource Management.
- *
- * Rôle central de cette classe :
- *   1. Créer la fenêtre et la barre de menus (Home, User, Ressources, Reservation, Charts).
- *   2. Réagir aux clics de menu via actionPerformed() pour afficher le bon panneau.
- *   3. "Câbler" les boutons de chaque panneau CRUD aux opérations du modèle
- *      (Utilisateur, Ressources, Reservations).
- *
- * Architecture générale de l'application :
- *   - model/            → Utilisateur, Ressources, Reservations (données en mémoire)
- *   - PaneUser/         → panneaux CRUD pour les utilisateurs
- *   - PaneRessources/   → panneaux CRUD pour les ressources
- *   - PaneReservations/ → panneaux CRUD pour les réservations
- *   - PaneCharts/       → graphiques d'analyse statistique
- *   - HomePanel         → import/export CSV + panneau d'accueil
- *
- * Principe du "câblage" :
- * Les panneaux CRUD (CreationUser, ModifieUser, etc.) sont de simples formulaires
- * graphiques : ils affichent des champs mais ne savent pas ce qu'il faut faire
- * quand on clique sur "Create" ou "Delete". C'est MainWindow qui connecte
- * ces boutons à la logique métier (ajouter dans la liste, valider les données, etc.)
- * grâce aux méthodes wire*() et refresh*().
- *
- * Cette classe implémente ActionListener pour gérer les clics sur les items de menu.
  */
 public class MainWindow implements ActionListener {
 
@@ -54,7 +31,7 @@ public class MainWindow implements ActionListener {
     // Attributs — fenêtre et items de menu
     // =========================================================================
 
-    /** La fenêtre principale de l'application (JFrame = fenêtre avec barre de titre). */
+    /** La fenêtre principale de l'application. */
     private JFrame frame;
 
     // --- Items du menu "Home" ---
@@ -83,13 +60,6 @@ public class MainWindow implements ActionListener {
     // Références aux panneaux courants
     // =========================================================================
 
-    /*
-     * Ces références permettent à MainWindow de câbler les boutons des panneaux
-     * après leur création. On conserve la référence pour pouvoir rafraîchir les
-     * listes déroulantes après chaque opération (par exemple, après avoir créé
-     * un utilisateur, le combo "Modify" doit afficher le nouveau nom).
-     */
-
     // Panneaux Utilisateurs
     private CreationUser    panelCreationUser;
     private ModifieUser     panelModifieUser;
@@ -112,12 +82,6 @@ public class MainWindow implements ActionListener {
     // Point d'entrée de l'application
     // =========================================================================
 
-    /**
-     * Méthode main : point de départ de l'application.
-     * Crée la fenêtre et la rend visible.
-     *
-     * @param args Arguments de la ligne de commande (non utilisés).
-     */
     public static void main(String[] args) {
         MainWindow window = new MainWindow(); // Création de la fenêtre
         window.frame.setVisible(true);        // Affichage à l'écran
@@ -142,19 +106,17 @@ public class MainWindow implements ActionListener {
         frame.setJMenuBar(menuBar); // Attachement de la barre à la fenêtre
 
         // =================================================================
-        // Menu "🏠 Home"
+        // Menu "Home"
         // =================================================================
-        JMenu homeMenu = new JMenu("🏠 Home");
+        JMenu homeMenu = new JMenu("Home");
         menuBar.add(homeMenu);
 
         // Item "Back to Home" : retourne au panneau d'accueil
         homeItem = new JMenuItem("Back to Home");
-        homeItem.addActionListener(this); // "this" = MainWindow réagira au clic via actionPerformed
+        homeItem.addActionListener(this);
         homeMenu.add(homeItem);
         homeMenu.add(new JSeparator()); // Ligne de séparation visuelle dans le menu
 
-        // Item "Export CSV" : raccourci pour exporter depuis le menu
-        // Crée un HomePanel invisible, clique programmatiquement sur son bouton Export
         JMenuItem homeExport = new JMenuItem("Export CSV…");
         homeExport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -172,34 +134,57 @@ public class MainWindow implements ActionListener {
         menuBar.add(userMenu);
 
         // Création des items et ajout dans le menu
-        // addActionListener(this) = MainWindow gère le clic dans actionPerformed()
-        userCreate = new JMenuItem("Create"); userCreate.addActionListener(this); userMenu.add(userCreate);
-        userModify = new JMenuItem("Modify"); userModify.addActionListener(this); userMenu.add(userModify);
-        userDelete = new JMenuItem("Delete"); userDelete.addActionListener(this); userMenu.add(userDelete);
-        userPrint  = new JMenuItem("Print");  userPrint.addActionListener(this);  userMenu.add(userPrint);
+        userCreate = new JMenuItem("Create");
+        userCreate.addActionListener(this);
+        userMenu.add(userCreate);
+        userModify = new JMenuItem("Modify"); 
+        userModify.addActionListener(this); 
+        userMenu.add(userModify);
+        userDelete = new JMenuItem("Delete"); 
+        userDelete.addActionListener(this); 
+        userMenu.add(userDelete);
+        userPrint  = new JMenuItem("Print");  
+        userPrint.addActionListener(this);  
+        userMenu.add(userPrint);
 
         // =================================================================
         // Menu "Ressources"
         // =================================================================
         JMenu ressourcesMenu = new JMenu("Ressources");
         menuBar.add(ressourcesMenu);
-        ressourceCreate = new JMenuItem("Create"); ressourceCreate.addActionListener(this); ressourcesMenu.add(ressourceCreate);
-        ressourceModify = new JMenuItem("Modify"); ressourceModify.addActionListener(this); ressourcesMenu.add(ressourceModify);
-        ressourceDelete = new JMenuItem("Delete"); ressourceDelete.addActionListener(this); ressourcesMenu.add(ressourceDelete);
-        ressourcePrint  = new JMenuItem("Print");  ressourcePrint.addActionListener(this);  ressourcesMenu.add(ressourcePrint);
+        ressourceCreate = new JMenuItem("Create");
+        ressourceCreate.addActionListener(this);
+        ressourcesMenu.add(ressourceCreate);
+        ressourceModify = new JMenuItem("Modify");
+        ressourceModify.addActionListener(this);
+        ressourcesMenu.add(ressourceModify);
+        ressourceDelete = new JMenuItem("Delete");
+        ressourceDelete.addActionListener(this);
+        ressourcesMenu.add(ressourceDelete);
+        ressourcePrint  = new JMenuItem("Print"); 
+        ressourcePrint.addActionListener(this); 
+        ressourcesMenu.add(ressourcePrint);
 
         // =================================================================
         // Menu "Reservation"
         // =================================================================
         JMenu reservationMenu = new JMenu("Reservation");
         menuBar.add(reservationMenu);
-        reservationCreate = new JMenuItem("Create"); reservationCreate.addActionListener(this); reservationMenu.add(reservationCreate);
-        reservationModify = new JMenuItem("Modify"); reservationModify.addActionListener(this); reservationMenu.add(reservationModify);
-        reservationDelete = new JMenuItem("Delete"); reservationDelete.addActionListener(this); reservationMenu.add(reservationDelete);
-        reservationPrint  = new JMenuItem("Print");  reservationPrint.addActionListener(this);  reservationMenu.add(reservationPrint);
+        reservationCreate = new JMenuItem("Create");
+        reservationCreate.addActionListener(this);
+        reservationMenu.add(reservationCreate);
+        reservationModify = new JMenuItem("Modify"); 
+        reservationModify.addActionListener(this); 
+        reservationMenu.add(reservationModify);
+        reservationDelete = new JMenuItem("Delete");
+        reservationDelete.addActionListener(this); 
+        reservationMenu.add(reservationDelete);
+        reservationPrint  = new JMenuItem("Print"); 
+        reservationPrint.addActionListener(this); 
+        reservationMenu.add(reservationPrint);
 
         // =================================================================
-        // Menu "📊 Charts"
+        // Menu "Charts"
         // =================================================================
         JMenu chartsMenu = new JMenu("Charts");
         menuBar.add(chartsMenu);
@@ -213,7 +198,6 @@ public class MainWindow implements ActionListener {
         JMenuItem cEvol    = new JMenuItem("Rate Evolution over Time");
 
         // Chaque item crée un nouveau panneau graphique et l'affiche dans la fenêtre
-        // On utilise new ActionListener() car chaque item a une action différente
         cTop5.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) { showPanel(new TopRessourcesChart()); }
         });
@@ -246,16 +230,6 @@ public class MainWindow implements ActionListener {
     // Dispatcher des clics de menu (implémentation de ActionListener)
     // =========================================================================
 
-    /**
-     * Méthode appelée automatiquement par Java quand l'utilisateur clique
-     * sur un item de menu qui a addActionListener(this).
-     *
-     * On compare la source de l'événement (e.getSource()) avec chaque item
-     * de menu connu. Quand on trouve la correspondance, on crée et affiche
-     * le panneau approprié, en le câblant si nécessaire.
-     *
-     * @param e L'événement de clic, qui contient la référence à l'item cliqué.
-     */
     public void actionPerformed(ActionEvent e) {
 
         Object src = e.getSource(); // L'item de menu qui a été cliqué
@@ -273,21 +247,21 @@ public class MainWindow implements ActionListener {
         if (src == userCreate) {
             // Création d'un nouvel utilisateur
             panelCreationUser = new CreationUser();
-            wireCreationUser(panelCreationUser); // Câblage du bouton "Create"
+            wireCreationUser(panelCreationUser); // liens du bouton "Create"
             showPanel(panelCreationUser);
 
         } else if (src == userModify) {
             // Modification d'un utilisateur existant
             panelModifieUser = new ModifieUser();
             refreshUserCombo(panelModifieUser);  // Rempli le combo avec les utilisateurs actuels
-            wireModifieUser(panelModifieUser);   // Câblage des boutons "Modify"
+            wireModifieUser(panelModifieUser);   // liens des boutons "Modify"
             showPanel(panelModifieUser);
 
         } else if (src == userDelete) {
             // Suppression d'un utilisateur
             panelDeleteUser = new DeleteUser();
             refreshUserCombo(panelDeleteUser);   // Rempli le combo avec les utilisateurs actuels
-            wireDeleteUser(panelDeleteUser);     // Câblage du bouton "Delete"
+            wireDeleteUser(panelDeleteUser);     // liens du bouton "Delete"
             showPanel(panelDeleteUser);
 
         } else if (src == userPrint) {
@@ -356,15 +330,6 @@ public class MainWindow implements ActionListener {
     // Utilitaire : affichage d'un panneau dans la fenêtre
     // =========================================================================
 
-    /**
-     * Remplace le contenu actuel de la fenêtre par le panneau donné.
-     *
-     * setContentPane() change le panneau principal de la fenêtre.
-     * revalidate() recalcule la disposition (layout) du nouveau panneau.
-     * repaint() redessine la fenêtre pour que le changement soit visible.
-     *
-     * @param panel Le nouveau panneau à afficher.
-     */
     private void showPanel(javax.swing.JPanel panel) {
         frame.setContentPane(panel); // Remplacement du contenu
         frame.revalidate();          // Recalcul du layout
@@ -372,19 +337,11 @@ public class MainWindow implements ActionListener {
     }
 
     // =========================================================================
-    // Câblage — Utilisateurs
+    // liens — Utilisateurs
     // =========================================================================
 
     /**
-     * Câble le bouton "Create" du panneau CreationUser à la logique de création.
-     *
-     * Quand l'utilisateur clique sur "Create" :
-     *   1. On lit le texte du champ de saisie.
-     *   2. On vérifie que le nom n'est pas vide et n'est pas déjà pris.
-     *   3. On crée le nouvel Utilisateur (qui s'ajoute automatiquement à la liste).
-     *   4. On affiche un message de confirmation et on réinitialise le champ.
-     *
-     * @param p Le panneau CreationUser contenant les composants à câbler.
+     * relie le bouton "Create" du panneau CreationUser à la logique de création.
      */
     private void wireCreationUser(final CreationUser p) {
         p.getCreateButton().addActionListener(new ActionListener() {
@@ -414,9 +371,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit le combo de ModifieUser avec tous les utilisateurs actuellement en mémoire.
-     * Appelé avant d'afficher le panneau et après chaque modification pour maintenir
-     * la liste à jour.
-     * @param p Le panneau ModifieUser dont le combo doit être mis à jour.
      */
     private void refreshUserCombo(ModifieUser p) {
         p.getListUser().removeAllItems(); // Vide le combo avant de le remplir
@@ -427,7 +381,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit le combo de DeleteUser avec tous les utilisateurs actuellement en mémoire.
-     * @param p Le panneau DeleteUser dont le combo doit être mis à jour.
      */
     private void refreshUserCombo(DeleteUser p) {
         p.getListUser().removeAllItems();
@@ -437,14 +390,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Câble le bouton "Modify" du panneau ModifieUser à la logique de renommage.
-     *
-     * L'utilisateur sélectionne un nom dans le combo et saisit le nouveau nom.
-     * On retrouve l'objet Utilisateur via print_user() et on appelle setNom().
-     * Toutes les réservations qui référencent cet objet voient le changement
-     * automatiquement car elles stockent une référence, pas une copie du nom.
-     *
-     * @param p Le panneau ModifieUser.
+     * relie le bouton "Modify" du panneau ModifieUser à la logique de renommage.
      */
     private void wireModifieUser(final ModifieUser p) {
         p.getModifyButton().addActionListener(new ActionListener() {
@@ -474,9 +420,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Câble le bouton "Delete" du panneau DeleteUser à la logique de suppression.
-     * Une boîte de confirmation est affichée avant la suppression effective.
-     * @param p Le panneau DeleteUser.
+     * relie le bouton "Delete" du panneau DeleteUser à la logique de suppression.
      */
     private void wireDeleteUser(final DeleteUser p) {
         p.getDeleteButton().addActionListener(new ActionListener() {
@@ -500,8 +444,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit le tableau de PrintUser avec tous les utilisateurs en mémoire.
-     * Crée un DefaultTableModel avec une colonne "Name" et une ligne par utilisateur.
-     * @param p Le panneau PrintUser.
      */
     private void wirePrintUser(PrintUser p) {
         String[] colonnes = {"Name"};
@@ -513,13 +455,11 @@ public class MainWindow implements ActionListener {
     }
 
     // =========================================================================
-    // Câblage — Ressources
+    // liens — Ressources
     // =========================================================================
 
     /**
-     * Câble le bouton "Create" du panneau CreationRessources.
-     * Pré-remplit aussi le combo "Domaine" avec les domaines déjà connus.
-     * @param p Le panneau CreationRessources.
+     * relie le bouton "Create" du panneau CreationRessources.
      */
     private void wireCreationRessources(final CreationRessources p) {
 
@@ -557,7 +497,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit les combos de ModifieRessources avec les ressources et domaines actuels.
-     * @param p Le panneau ModifieRessources.
      */
     private void refreshRessourceCombo(ModifieRessources p) {
         p.getListRessource().removeAllItems();
@@ -581,12 +520,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Câble les boutons "Check" et "Modify" du panneau ModifieRessources.
-     *
-     * "Check" charge les données actuelles de la ressource dans les champs éditables.
-     * "Modify" valide et enregistre les modifications.
-     *
-     * @param p Le panneau ModifieRessources.
+     * relie les boutons "Check" et "Modify" du panneau ModifieRessources.
      */
     private void wireModifieRessources(final ModifieRessources p) {
 
@@ -634,8 +568,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Câble le bouton "Delete" du panneau DeleteRessources.
-     * @param p Le panneau DeleteRessources.
+     * relie le bouton "Delete" du panneau DeleteRessources.
      */
     private void wireDeleteRessources(final DeleteRessources p) {
         p.getDeleteButton().addActionListener(new ActionListener() {
@@ -655,7 +588,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit le tableau de PrintRessources avec toutes les ressources en mémoire.
-     * @param p Le panneau PrintRessources.
      */
     private void wirePrintRessources(PrintRessources p) {
         String[] colonnes = {"Name", "Description", "Domain", "Last update"};
@@ -671,13 +603,11 @@ public class MainWindow implements ActionListener {
     }
 
     // =========================================================================
-    // Câblage — Réservations
+    // liens — Réservations
     // =========================================================================
 
     /**
-     * Câble le bouton "Create" du panneau CreationReservations.
-     * Pré-remplit les combos User, Ressource et Type avec les valeurs connues.
-     * @param p Le panneau CreationReservations.
+     * relie le bouton "Create" du panneau CreationReservations.
      */
     private void wireCreationReservations(final CreationReservations p) {
 
@@ -735,7 +665,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit les combos de ModifieReservations avec les données actuelles.
-     * @param p Le panneau ModifieReservations.
      */
     private void refreshReservationCombos(ModifieReservations p) {
         for (int i = 0; i < Utilisateur.liste_utilisateur.size(); i++)
@@ -747,7 +676,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit les combos de DeleteReservations avec les données actuelles.
-     * @param p Le panneau DeleteReservations.
      */
     private void refreshReservationCombos(DeleteReservations p) {
         for (int i = 0; i < Utilisateur.liste_utilisateur.size(); i++)
@@ -757,13 +685,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Câble les boutons "Search" (Check) et "Modify" du panneau ModifieReservations.
-     *
-     * L'identification d'une réservation se fait par (user + ressource + jour).
-     * "Search" retrouve la réservation et pré-remplit les champs modifiables.
-     * "Modify" valide et enregistre les changements.
-     *
-     * @param p Le panneau ModifieReservations.
+     * relie les boutons "Search" (Check) et "Modify" du panneau ModifieReservations.
      */
     private void wireModifieReservations(final ModifieReservations p) {
 
@@ -842,8 +764,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Câble le bouton "Delete" du panneau DeleteReservations.
-     * @param p Le panneau DeleteReservations.
+     * relie le bouton "Delete" du panneau DeleteReservations.
      */
     private void wireDeleteReservations(final DeleteReservations p) {
         p.getDeleteButton().addActionListener(new ActionListener() {
@@ -877,7 +798,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Remplit le tableau de PrintReservations avec toutes les réservations en mémoire.
-     * @param p Le panneau PrintReservations.
      */
     private void wirePrintReservations(PrintReservations p) {
         String[] colonnes = {"User", "Ressource", "Date", "Time", "Duration", "Type"};
@@ -900,13 +820,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Tente de parser une heure au format "HH:mm" et la retourne en LocalTime.
-     *
-     * On entoure le parse dans un try/catch car LocalTime.parse() lève une
-     * DateTimeParseException si le format est invalide (ex : "25:00" ou "abc").
-     * Dans ce cas, on retourne null et l'appelant affiche un message d'erreur.
-     *
-     * @param s La chaîne à parser (ex : "09:30").
-     * @return Un LocalTime, ou null si la chaîne n'est pas au format HH:mm.
      */
     private LocalTime parseHeure(String s) {
         try {
@@ -917,13 +830,7 @@ public class MainWindow implements ActionListener {
     }
 
     /**
-     * Retourne la liste des domaines distincts présents dans Ressources.liste_ressource,
-     * triée alphabétiquement.
-     *
-     * Utilisée pour pré-remplir les combos "Domaine" dans les panneaux CRUD.
-     * On évite les doublons en vérifiant manuellement si le domaine est déjà dans la liste.
-     *
-     * @return Un tableau String[] des domaines connus, triés alphabétiquement.
+     * Retourne la liste des domaines distincts présents dans Ressources.liste_ressource, triée alphabétiquement.
      */
     private String[] domainesConnus() {
         ArrayList<String> list = new ArrayList<String>();
@@ -960,9 +867,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Retourne les types d'emprunt distincts présents dans les réservations,
-     * triés alphabétiquement. Les trois valeurs par défaut sont toujours incluses.
-     *
-     * @return Un tableau String[] des types connus, triés alphabétiquement.
      */
     private String[] typesEmpruntConnus() {
         ArrayList<String> list = new ArrayList<String>();
@@ -998,7 +902,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Affiche une boîte de dialogue d'erreur modale.
-     * @param msg Le message d'erreur à afficher.
      */
     private void showError(String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE);
@@ -1006,7 +909,6 @@ public class MainWindow implements ActionListener {
 
     /**
      * Affiche une boîte de dialogue de succès modale.
-     * @param msg Le message de confirmation à afficher.
      */
     private void showInfo(String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Success", JOptionPane.INFORMATION_MESSAGE);

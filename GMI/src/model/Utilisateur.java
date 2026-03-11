@@ -4,11 +4,6 @@ import java.util.ArrayList;
 
 /**
  * Représente un utilisateur du système.
- *
- * Chaque utilisateur possède un nom unique qui sert d'identifiant dans toute
- * l'application. La liste statique liste_utilisateur permet de sauvegarder l'ensemble des utilisateurs.
- *
- * Quand un objet Utilisateur est créé, il s'ajoute automatiquement à la liste.
  */
 public class Utilisateur {
 
@@ -46,12 +41,6 @@ public class Utilisateur {
 
     /**
      * Recherche et retourne un utilisateur dans la liste globale par son nom.
-     *
-     * On parcourt la liste un élément à la fois.
-     * Dès qu'on trouve un utilisateur dont le nom correspond exactement, on le retourne. Si on arrive à la fin sans trouver, on retourne null.
-     *
-     * @param nom Le nom de l'utilisateur à rechercher (sensible à la casse).
-     * @return L'objet Utilisateur correspondant, ou null s'il n'existe pas.
      */
     public static Utilisateur print_user(String nom) {
 
@@ -72,17 +61,6 @@ public class Utilisateur {
 
     /**
      * Supprime de la liste globale l'utilisateur dont le nom correspond.
-     *
-     * On utilise un index {@code i} plutôt qu'un for-each car on modifie
-     * la liste pendant la boucle. Quand on supprime l'élément à la position i,
-     * tous les éléments suivants reculent d'une case. On fait donc {@code i--}
-     * pour ne pas "sauter" l'élément qui vient de prendre la place de celui
-     * qu'on vient de supprimer.
-     *
-     * Dans la pratique, les noms étant uniques, la boucle ne supprimera
-     * qu'un seul élément, mais le mécanisme i-- reste une bonne habitude.
-     *
-     * @param nom Le nom de l'utilisateur à supprimer.
      */
     public static void delete_user(String nom) {
 

@@ -10,20 +10,7 @@ import java.util.regex.*;
 
 /**
  * Classe utilitaire pour le chargement et l'export des données au format CSV.
- *
- * Cette classe centralise toute la logique d'import/export :
- *   - chargement() lit un fichier CSV et peuple les listes statiques
- *     Utilisateur.liste_utilisateur, Ressources.liste_ressource et
- *     Reservations.liste_reservations.
- *   - export() écrit l'ensemble des réservations en mémoire dans un fichier CSV
- *     au même format que le fichier source.
- *
- * Résultat retourné :
- * Les deux méthodes retournent un CsvResult qui contient les compteurs
- * (nbUsers, nbRessources, nbReservations, nbErreurs) et un éventuel message
- * d'erreur fatale. HomePanel peut ainsi afficher un compte-rendu sans avoir
- * besoin de connaître les détails du parsing.
- */
+  */
 public class CSV {
 
     // =========================================================================
@@ -74,20 +61,6 @@ public class CSV {
 
     /**
      * Charge un fichier CSV et peuple les listes statiques du modèle.
-     *
-     * Format attendu (séparateur ";") :
-     *   Réservation au nom de ; Domaines ; Ressources ; Description ;
-     *   Heure - Durée ; Type ; Dernière mise à jour
-     *
-     * La première ligne (en-tête) est ignorée si elle commence par "R".
-     * Les lignes incomplètes (moins de 6 colonnes) ou dont le parsing de
-     * date/heure échoue sont comptées comme erreurs et ignorées.
-     *
-     * Les objets Utilisateur et Ressources sont créés uniquement s'ils
-     * n'existent pas encore (unicité par nom).
-     *
-     * @param chemin Chemin absolu ou relatif du fichier CSV à lire.
-     * @return Un CsvResult avec les compteurs et l'éventuelle erreur fatale.
      */
     public CsvResult chargement(String chemin) {
 
@@ -167,14 +140,6 @@ public class CSV {
 
     /**
      * Exporte toutes les réservations en mémoire dans un fichier CSV.
-     *
-     * Le fichier produit est au même format que le fichier source, ce qui permet
-     * de le recharger ultérieurement via chargement(). L'encodage utilisé est
-     * ISO-8859-1 pour conserver la compatibilité avec le fichier d'origine.
-     *
-     * @param chemin Chemin absolu ou relatif du fichier de destination.
-     * @return Un CsvResult (nbReservations = nombre de lignes écrites,
-     *         erreurFatale non null en cas d'erreur d'écriture).
      */
     public CsvResult export(String chemin) {
 
@@ -225,10 +190,6 @@ public class CSV {
 
     /**
      * Parse la date depuis une chaîne au format long français.
-     * Exemple attendu : "mercredi 01 septembre 2021 08:30:00"
-     *
-     * @param s La chaîne contenant la date.
-     * @return Un objet Date avec l'heure à minuit, ou null si le parsing échoue.
      */
     private Date parseDate(String s) {
         Pattern p = Pattern.compile(
@@ -249,10 +210,6 @@ public class CSV {
 
     /**
      * Extrait l'heure depuis une chaîne contenant un horodatage.
-     * Cherche le premier motif HH:mm:ss dans la chaîne.
-     *
-     * @param s La chaîne source.
-     * @return Un LocalTime, ou null si aucun motif HH:mm:ss n'est trouvé.
      */
     private LocalTime parseHeure(String s) {
         Pattern p = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})");
@@ -268,11 +225,6 @@ public class CSV {
 
     /**
      * Convertit une durée textuelle en minutes.
-     * Reconnaît les unités : semaine(s), jour(s), heure(s), minute(s).
-     * Exemple : "1 heure et 30 minutes" → 90
-     *
-     * @param s La chaîne décrivant la durée.
-     * @return La durée totale en minutes (0 si aucune unité reconnue).
      */
     private int parseDureeMinutes(String s) {
         int total = 0;
@@ -294,10 +246,6 @@ public class CSV {
 
     /**
      * Formate une Date en chaîne longue française pour l'export.
-     * Exemple : "mercredi 01 septembre 2021 "
-     *
-     * @param d La date à formater.
-     * @return La chaîne formatée, ou "" si d est null.
      */
     private String formatDateLong(Date d) {
         if (d == null) return "";
@@ -312,10 +260,6 @@ public class CSV {
 
     /**
      * Convertit une durée en minutes en texte français lisible.
-     * Exemple : 90 → "1 heure(s) et 30 minute(s)"
-     *
-     * @param minutes La durée en minutes.
-     * @return La représentation textuelle de la durée.
      */
     private String formatDureeTexte(int minutes) {
         int semaines = minutes / (7 * 24 * 60); minutes %= (7 * 24 * 60);
@@ -341,11 +285,6 @@ public class CSV {
 
     /**
      * Protège une valeur pour l'insertion dans un champ CSV.
-     * Si la valeur contient ";" ou des guillemets, elle est entourée de guillemets
-     * et les guillemets internes sont doublés.
-     *
-     * @param val La valeur à sécuriser.
-     * @return La valeur prête à être insérée dans le CSV.
      */
     private String csv(String val) {
         if (val == null) return "";
