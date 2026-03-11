@@ -43,7 +43,7 @@ public class DeleteReservations extends JPanel {
         add(panelCriteres, "flowx, cell 0 1, growx");
 
         JPanel panelDelete = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        deleteButton = new JButton("🗑️  Delete");
+        deleteButton = new JButton("Delete");
         deleteButton.setFont(new Font("Tahoma", Font.PLAIN, 22));
         panelDelete.add(deleteButton);
         add(panelDelete, "flowx, cell 0 2, grow");

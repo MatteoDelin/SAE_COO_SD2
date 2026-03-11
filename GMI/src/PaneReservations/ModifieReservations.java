@@ -39,7 +39,7 @@ public class ModifieReservations extends JPanel {
         add(panelRecherche, "cell 0 1, growx");
 
         JPanel panelCheck = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        checkButton = new JButton("🔍  Search");
+        checkButton = new JButton("Search");
         checkButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
         panelCheck.add(checkButton);
         add(panelCheck, "cell 0 2, growx");
@@ -70,7 +70,7 @@ public class ModifieReservations extends JPanel {
         add(panelEdit, "cell 0 4, growx");
 
         JPanel panelModify = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        modifyButton = new JButton("✏️  Modify");
+        modifyButton = new JButton("Modify");
         modifyButton.setFont(new Font("Tahoma", Font.PLAIN, 22));
         modifyButton.setEnabled(false);
         panelModify.add(modifyButton);
