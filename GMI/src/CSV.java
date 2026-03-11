@@ -19,6 +19,7 @@ public class CSV {
         mois.put("octobre",10); mois.put("novembre",11);  mois.put("décembre",12);
 
         List<String[]> lignes = new ArrayList<>();
+        List<String> lignesIgnorees = new ArrayList<>(); // Descriptions des conflits détectés
 
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(new FileInputStream(chemin), "ISO-8859-1"));
@@ -98,6 +99,18 @@ public class CSV {
             Ressources ress = Ressources.print_user(nomRess);
             if (ress == null) ress = new Ressources(nomRess, descRess, domaine, new Date());
 
+            // ── Vérification de conflit avant l'import ──────────────────────
+            Reservations conflit = Reservations.findConflict(ress, date, heure, duree, null);
+            if (conflit != null) {
+                lignesIgnorees.add(String.format(
+                    "%s / %s — conflicts with %s's reservation at %s",
+                    nomUser, nomRess,
+                    conflit.getUser().getNom(),
+                    conflit.getHeure().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))));
+                continue; // On ignore cette ligne
+            }
+            // ────────────────────────────────────────────────────────────────
+
             new Reservations(user, ress, date, heure, duree, typeEmpr);
 
             lignes.add(new String[]{ nomUser, nomRess, domaine, descRess,
@@ -105,8 +118,18 @@ public class CSV {
         }
 
         br.close();
+
+        // On stocke les descriptions des conflits pour que l'appelant puisse les afficher
+        this.dernierLignesIgnorees = lignesIgnorees;
+
         return lignes.toArray(new String[0][]);
     }
+
+    /** Liste des réservations ignorées (descriptions) lors du dernier chargement. */
+    private List<String> dernierLignesIgnorees = new ArrayList<>();
+
+    /** Retourne la liste des conflits détectés lors du dernier import. */
+    public List<String> getLignesIgnorees() { return dernierLignesIgnorees; }
 
     public void export(String chemin) throws IOException {
 
@@ -122,7 +145,6 @@ public class CSV {
 
         for (Reservations res : Reservations.liste_reservations) {
 
-            // Formatage date
             String dateTexte = "";
             if (res.getDate() != null) {
                 Calendar c = Calendar.getInstance();
@@ -136,7 +158,6 @@ public class CSV {
 
             String dateHeure = dateTexte + res.getHeure().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
-            // Formatage durée
             int minutes  = res.getDuree();
             int semaines = minutes / (7 * 24 * 60); minutes %= (7 * 24 * 60);
             int jours    = minutes / (24 * 60);     minutes %= (24 * 60);
@@ -156,7 +177,6 @@ public class CSV {
                 sbDuree.append(parts.get(i));
             }
 
-            // Échappement CSV
             String[] vals = {
                 res.getUser().getNom(),
                 res.getRessource().getDomaine(),
