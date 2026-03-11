@@ -8,288 +8,175 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.*;
 
-/**
- * Classe utilitaire pour le chargement et l'export des données au format CSV.
-  */
 public class CSV {
 
-    // =========================================================================
-    // Constantes de parsing
-    // =========================================================================
+    public String[][] chargement(String chemin) throws IOException {
 
-    /** Map mois français → numéro (1-12), utilisée dans parseDate(). */
-    private static final Map<String, Integer> MOIS = new LinkedHashMap<>();
-    static {
-        MOIS.put("janvier",1);  MOIS.put("février",2);   MOIS.put("mars",3);
-        MOIS.put("avril",4);    MOIS.put("mai",5);        MOIS.put("juin",6);
-        MOIS.put("juillet",7);  MOIS.put("août",8);       MOIS.put("septembre",9);
-        MOIS.put("octobre",10); MOIS.put("novembre",11);  MOIS.put("décembre",12);
-    }
+        Map<String, Integer> mois = new LinkedHashMap<>();
+        mois.put("janvier",1);  mois.put("février",2);   mois.put("mars",3);
+        mois.put("avril",4);    mois.put("mai",5);        mois.put("juin",6);
+        mois.put("juillet",7);  mois.put("août",8);       mois.put("septembre",9);
+        mois.put("octobre",10); mois.put("novembre",11);  mois.put("décembre",12);
 
-    /** Noms de jours français pour la reconstruction du format long lors de l'export. */
-    private static final String[] JOURS_FR =
-        {"dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"};
+        List<String[]> lignes = new ArrayList<>();
 
-    /** Noms de mois français pour la reconstruction du format long lors de l'export. */
-    private static final String[] MOIS_FR =
-        {"","janvier","février","mars","avril","mai","juin",
-         "juillet","août","septembre","octobre","novembre","décembre"};
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(chemin), "ISO-8859-1"));
+        String ligne;
+        boolean premiereLigne = true;
 
-    // =========================================================================
-    // Classe résultat
-    // =========================================================================
+        while ((ligne = br.readLine()) != null) {
+            ligne = ligne.trim();
+            if (ligne.isEmpty()) continue;
 
-    /**
-     * Encapsule le résultat d'une opération CSV.
-     * Permet à HomePanel d'afficher un compte-rendu sans connaître les détails
-     * internes du parsing.
-     */
-    public static class CsvResult {
-        public int     nbUsers;
-        public int     nbRessources;
-        public int     nbReservations;
-        public int     nbErreurs;
-        public String  erreurFatale;   // null si pas d'erreur bloquante
-
-        /** @return true si l'opération s'est terminée sans erreur fatale. */
-        public boolean isOk() { return erreurFatale == null; }
-    }
-
-    // =========================================================================
-    // Import
-    // =========================================================================
-
-    /**
-     * Charge un fichier CSV et peuple les listes statiques du modèle.
-     */
-    public CsvResult chargement(String chemin) {
-
-        CsvResult result = new CsvResult();
-
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream(chemin), "ISO-8859-1"))) {
-
-            String  ligne;
-            boolean premiereLigne = true;
-
-            while ((ligne = br.readLine()) != null) {
-                ligne = ligne.trim();
-                if (ligne.isEmpty()) continue;
-
-                // Ignorer la ligne d'en-tête
-                if (premiereLigne) {
-                    premiereLigne = false;
-                    if (ligne.startsWith("Réservation") || ligne.startsWith("R")) continue;
-                }
-
-                // Découpage en colonnes (on garde les champs vides avec -1)
-                String[] cols = ligne.split(";", -1);
-                if (cols.length < 6) { result.nbErreurs++; continue; }
-
-                String nomUser    = cols[0].trim();
-                String domaine    = cols[1].trim();
-                String nomRess    = cols[2].trim();
-                String descRess   = cols[3].trim();
-                String heureDuree = cols[4].trim();
-                String typeEmpr   = cols[5].trim();
-
-                // Champs obligatoires
-                if (nomUser.isEmpty() || nomRess.isEmpty() || heureDuree.isEmpty()) {
-                    result.nbErreurs++; continue;
-                }
-
-                // La colonne heureDuree contient "date heure - durée"
-                String[] partsHD = heureDuree.split(" - ", 2);
-                if (partsHD.length < 2) { result.nbErreurs++; continue; }
-
-                Date      date  = parseDate(partsHD[0].trim());
-                LocalTime heure = parseHeure(partsHD[0].trim());
-                int       duree = parseDureeMinutes(partsHD[1].trim());
-
-                if (date == null || heure == null) { result.nbErreurs++; continue; }
-
-                // Création ou récupération de l'utilisateur
-                Utilisateur user = Utilisateur.print_user(nomUser);
-                if (user == null) {
-                    user = new Utilisateur(nomUser);
-                    result.nbUsers++;
-                }
-
-                // Création ou récupération de la ressource
-                Ressources ress = Ressources.print_user(nomRess);
-                if (ress == null) {
-                    ress = new Ressources(nomRess, descRess, domaine, new Date());
-                    result.nbRessources++;
-                }
-
-                // Création de la réservation (s'ajoute automatiquement à liste_reservations)
-                new Reservations(user, ress, date, heure, duree, typeEmpr);
-                result.nbReservations++;
+            if (premiereLigne) {
+                premiereLigne = false;
+                if (ligne.startsWith("Réservation") || ligne.startsWith("R")) continue;
             }
 
-        } catch (IOException ex) {
-            result.erreurFatale = ex.getMessage();
-        }
+            String[] cols = ligne.split(";", -1);
+            if (cols.length < 6) continue;
 
-        return result;
-    }
+            String nomUser    = cols[0].trim();
+            String domaine    = cols[1].trim();
+            String nomRess    = cols[2].trim();
+            String descRess   = cols[3].trim();
+            String heureDuree = cols[4].trim();
+            String typeEmpr   = cols[5].trim();
 
-    // =========================================================================
-    // Export
-    // =========================================================================
+            if (nomUser.isEmpty() || nomRess.isEmpty() || heureDuree.isEmpty()) continue;
 
-    /**
-     * Exporte toutes les réservations en mémoire dans un fichier CSV.
-     */
-    public CsvResult export(String chemin) {
+            String[] partsHD = heureDuree.split(" - ", 2);
+            if (partsHD.length < 2) continue;
 
-        CsvResult result = new CsvResult();
-
-        try (PrintWriter pw = new PrintWriter(
-                new OutputStreamWriter(new FileOutputStream(chemin), "ISO-8859-1"))) {
-
-            // Ligne d'en-tête identique au fichier source
-            pw.println("Réservation au nom de ;Domaines :;Ressources : ;Description :;"
-                     + "Heure - Durée :;Type;Dernière mise à jour");
-
-            DateTimeFormatter fmtH = DateTimeFormatter.ofPattern("HH:mm:ss");
-
-            for (Reservations res : Reservations.liste_reservations) {
-
-                String dateHeure  = formatDateLong(res.getDate())
-                        + " " + res.getHeure().format(fmtH);
-                String dureeTexte = formatDureeTexte(res.getDuree());
-
-                // La colonne "Dernière mise à jour" reprend la date+heure de réservation
-                String maj = formatDateLong(res.getDate())
-                        + res.getHeure().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-
-                pw.printf("%s;%s;%s;%s;%s - %s ;%s ;%s%n",
-                    csv(res.getUser().getNom()),
-                    csv(res.getRessource().getDomaine()),
-                    csv(res.getRessource().getNom()),
-                    csv(res.getRessource().getDescription()),
-                    dateHeure,
-                    dureeTexte,
-                    csv(res.getType_emprunt()),
-                    maj);
-
-                result.nbReservations++;
+            // Parsing date
+            Date date = null;
+            Matcher mDate = Pattern.compile(
+                "\\w+\\s+(\\d{1,2})\\s+(\\w+)\\s+(\\d{4})\\s+(\\d{2}):(\\d{2}):(\\d{2})")
+                .matcher(partsHD[0].trim());
+            if (mDate.find()) {
+                int jour  = Integer.parseInt(mDate.group(1));
+                int m     = mois.getOrDefault(mDate.group(2).toLowerCase(), -1);
+                int annee = Integer.parseInt(mDate.group(3));
+                if (m >= 0) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(annee, m - 1, jour, 0, 0, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    date = cal.getTime();
+                }
             }
 
-        } catch (IOException ex) {
-            result.erreurFatale = ex.getMessage();
+            // Parsing heure
+            LocalTime heure = null;
+            Matcher mHeure = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})")
+                .matcher(partsHD[0].trim());
+            if (mHeure.find()) {
+                heure = LocalTime.of(
+                    Integer.parseInt(mHeure.group(1)),
+                    Integer.parseInt(mHeure.group(2)),
+                    Integer.parseInt(mHeure.group(3)));
+            }
+
+            if (date == null || heure == null) continue;
+
+            // Parsing durée
+            int duree = 0;
+            Matcher md;
+            md = Pattern.compile("(\\d+)\\s*semaine").matcher(partsHD[1]);
+            if (md.find()) duree += Integer.parseInt(md.group(1)) * 7 * 24 * 60;
+            md = Pattern.compile("(\\d+)\\s*jour").matcher(partsHD[1]);
+            if (md.find()) duree += Integer.parseInt(md.group(1)) * 24 * 60;
+            md = Pattern.compile("(\\d+)\\s*heure").matcher(partsHD[1]);
+            if (md.find()) duree += Integer.parseInt(md.group(1)) * 60;
+            md = Pattern.compile("(\\d+)\\s*minute").matcher(partsHD[1]);
+            if (md.find()) duree += Integer.parseInt(md.group(1));
+
+            // Création des objets métier
+            Utilisateur user = Utilisateur.print_user(nomUser);
+            if (user == null) user = new Utilisateur(nomUser);
+
+            Ressources ress = Ressources.print_user(nomRess);
+            if (ress == null) ress = new Ressources(nomRess, descRess, domaine, new Date());
+
+            new Reservations(user, ress, date, heure, duree, typeEmpr);
+
+            lignes.add(new String[]{ nomUser, nomRess, domaine, descRess,
+                                     heureDuree, typeEmpr });
         }
 
-        return result;
+        br.close();
+        return lignes.toArray(new String[0][]);
     }
 
-    // =========================================================================
-    // Méthodes de parsing privées
-    // =========================================================================
+    public void export(String chemin) throws IOException {
 
-    /**
-     * Parse la date depuis une chaîne au format long français.
-     */
-    private Date parseDate(String s) {
-        Pattern p = Pattern.compile(
-            "\\w+\\s+(\\d{1,2})\\s+(\\w+)\\s+(\\d{4})\\s+(\\d{2}):(\\d{2}):(\\d{2})");
-        Matcher m = p.matcher(s);
-        if (!m.find()) return null;
-        try {
-            int jour  = Integer.parseInt(m.group(1));
-            int mois  = MOIS.getOrDefault(m.group(2).toLowerCase(), -1);
-            int annee = Integer.parseInt(m.group(3));
-            if (mois < 0) return null;
-            Calendar cal = Calendar.getInstance();
-            cal.set(annee, mois - 1, jour, 0, 0, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            return cal.getTime();
-        } catch (Exception e) { return null; }
-    }
+        String[] joursFr = {"dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"};
+        String[] moisFr  = {"","janvier","février","mars","avril","mai","juin",
+                             "juillet","août","septembre","octobre","novembre","décembre"};
 
-    /**
-     * Extrait l'heure depuis une chaîne contenant un horodatage.
-     */
-    private LocalTime parseHeure(String s) {
-        Pattern p = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})");
-        Matcher m = p.matcher(s);
-        if (!m.find()) return null;
-        try {
-            return LocalTime.of(
-                Integer.parseInt(m.group(1)),
-                Integer.parseInt(m.group(2)),
-                Integer.parseInt(m.group(3)));
-        } catch (Exception e) { return null; }
-    }
+        PrintWriter pw = new PrintWriter(
+                new OutputStreamWriter(new FileOutputStream(chemin), "ISO-8859-1"));
 
-    /**
-     * Convertit une durée textuelle en minutes.
-     */
-    private int parseDureeMinutes(String s) {
-        int total = 0;
-        Matcher m;
-        m = Pattern.compile("(\\d+)\\s*semaine").matcher(s);
-        if (m.find()) total += Integer.parseInt(m.group(1)) * 7 * 24 * 60;
-        m = Pattern.compile("(\\d+)\\s*jour").matcher(s);
-        if (m.find()) total += Integer.parseInt(m.group(1)) * 24 * 60;
-        m = Pattern.compile("(\\d+)\\s*heure").matcher(s);
-        if (m.find()) total += Integer.parseInt(m.group(1)) * 60;
-        m = Pattern.compile("(\\d+)\\s*minute").matcher(s);
-        if (m.find()) total += Integer.parseInt(m.group(1));
-        return total;
-    }
+        pw.println("Réservation au nom de ;Domaines :;Ressources : ;Description :;"
+                 + "Heure - Durée :;Type;Dernière mise à jour");
 
-    // =========================================================================
-    // Méthodes de formatage privées
-    // =========================================================================
+        for (Reservations res : Reservations.liste_reservations) {
 
-    /**
-     * Formate une Date en chaîne longue française pour l'export.
-     */
-    private String formatDateLong(Date d) {
-        if (d == null) return "";
-        Calendar c = Calendar.getInstance();
-        c.setTime(d);
-        return String.format("%s %02d %s %d ",
-            JOURS_FR[c.get(Calendar.DAY_OF_WEEK) - 1],
-            c.get(Calendar.DAY_OF_MONTH),
-            MOIS_FR[c.get(Calendar.MONTH) + 1],
-            c.get(Calendar.YEAR));
-    }
+            // Formatage date
+            String dateTexte = "";
+            if (res.getDate() != null) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(res.getDate());
+                dateTexte = String.format("%s %02d %s %d ",
+                    joursFr[c.get(Calendar.DAY_OF_WEEK) - 1],
+                    c.get(Calendar.DAY_OF_MONTH),
+                    moisFr[c.get(Calendar.MONTH) + 1],
+                    c.get(Calendar.YEAR));
+            }
 
-    /**
-     * Convertit une durée en minutes en texte français lisible.
-     */
-    private String formatDureeTexte(int minutes) {
-        int semaines = minutes / (7 * 24 * 60); minutes %= (7 * 24 * 60);
-        int jours    = minutes / (24 * 60);     minutes %= (24 * 60);
-        int heures   = minutes / 60;            minutes %= 60;
-        int mins     = minutes;
+            String dateHeure = dateTexte + res.getHeure().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
-        List<String> parts = new ArrayList<>();
-        if (semaines > 0) parts.add(semaines + " semaine(s)");
-        if (jours    > 0) parts.add(jours    + " jour(s)");
-        if (heures   > 0) parts.add(heures   + " heure(s)");
-        if (mins     > 0) parts.add(mins     + " minute(s)");
-        if (parts.isEmpty()) return "0 heure(s)";
+            // Formatage durée
+            int minutes  = res.getDuree();
+            int semaines = minutes / (7 * 24 * 60); minutes %= (7 * 24 * 60);
+            int jours    = minutes / (24 * 60);     minutes %= (24 * 60);
+            int heures   = minutes / 60;            minutes %= 60;
+            int mins     = minutes;
 
-        if (parts.size() == 1) return parts.get(0);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < parts.size(); i++) {
-            if (i > 0) sb.append(i == parts.size() - 1 ? " et " : ", ");
-            sb.append(parts.get(i));
+            List<String> parts = new ArrayList<>();
+            if (semaines > 0) parts.add(semaines + " semaine(s)");
+            if (jours    > 0) parts.add(jours    + " jour(s)");
+            if (heures   > 0) parts.add(heures   + " heure(s)");
+            if (mins     > 0) parts.add(mins     + " minute(s)");
+            if (parts.isEmpty()) parts.add("0 heure(s)");
+
+            StringBuilder sbDuree = new StringBuilder();
+            for (int i = 0; i < parts.size(); i++) {
+                if (i > 0) sbDuree.append(i == parts.size() - 1 ? " et " : ", ");
+                sbDuree.append(parts.get(i));
+            }
+
+            // Échappement CSV
+            String[] vals = {
+                res.getUser().getNom(),
+                res.getRessource().getDomaine(),
+                res.getRessource().getNom(),
+                res.getRessource().getDescription(),
+                res.getType_emprunt(),
+                dateTexte + res.getHeure().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            };
+            for (int i = 0; i < vals.length; i++) {
+                if (vals[i] == null) vals[i] = "";
+                if (vals[i].contains(";") || vals[i].contains("\""))
+                    vals[i] = "\"" + vals[i].replace("\"", "\"\"") + "\"";
+            }
+
+            pw.printf("%s;%s;%s;%s;%s - %s ;%s ;%s%n",
+                vals[0], vals[1], vals[2], vals[3],
+                dateHeure, sbDuree.toString(),
+                vals[4], vals[5]);
         }
-        return sb.toString();
-    }
 
-    /**
-     * Protège une valeur pour l'insertion dans un champ CSV.
-     */
-    private String csv(String val) {
-        if (val == null) return "";
-        if (val.contains(";") || val.contains("\""))
-            return "\"" + val.replace("\"", "\"\"") + "\"";
-        return val;
+        pw.close();
     }
 }

@@ -29,7 +29,6 @@ public class HomePanel extends JPanel {
     private JButton exportButton;
     private JButton browseButton;
 
-    /** Instance de la classe CSV utilisée pour l'import et l'export. */
     private final CSV csv = new CSV();
 
     public HomePanel() {
@@ -45,9 +44,9 @@ public class HomePanel extends JPanel {
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        tabs.addTab("👤 Users",        buildScrollTable(modelUsers));
-        tabs.addTab("📦 Ressources",   buildScrollTable(modelRess));
-        tabs.addTab("📅 Reservations", buildScrollTable(modelReserv));
+        tabs.addTab("Users",        buildScrollTable(modelUsers));
+        tabs.addTab("Ressources",   buildScrollTable(modelRess));
+        tabs.addTab("Reservations", buildScrollTable(modelReserv));
         add(tabs, "cell 0 2, grow");
 
         statusLabel = new JLabel(
@@ -60,14 +59,14 @@ public class HomePanel extends JPanel {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bar.setOpaque(false);
 
-        browseButton = new JButton("📂  Browse…");
+        browseButton = new JButton("Browse…");
         browseButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
         browseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) { openChooser(); }
         });
         bar.add(browseButton);
 
-        exportButton = new JButton("💾  Export CSV");
+        exportButton = new JButton("Export CSV");
         exportButton.setFont(new Font("Tahoma", Font.BOLD, 14));
         exportButton.setBackground(new Color(50, 120, 190));
         exportButton.setForeground(Color.WHITE);
@@ -102,7 +101,7 @@ public class HomePanel extends JPanel {
 
         JLabel hint = new JLabel(
             "<html><center>"
-            + "🗂️ &nbsp;<b>Drag and drop a CSV file here</b> &nbsp;(or click to browse)<br>"
+            + "&nbsp;<b>Drag and drop a CSV file here</b> &nbsp;(or click to browse)<br>"
             + "<span style='font-size:10px;color:#777'>"
             + "Format: Reservation name ; Domain ; Ressources ; Description ; Time - Duration ; Type ; Last update"
             + "</span></center></html>",
@@ -123,28 +122,26 @@ public class HomePanel extends JPanel {
                 zone.setBackground(new Color(185, 215, 248));
                 zone.setBorder(new DashBorder(new Color(30, 90, 200), 8));
             }
-            @Override public void dragExit(DropTargetEvent d) {
-                resetZone(zone);
-            }
+            @Override public void dragExit(DropTargetEvent d) { resetZone(zone); }
             @Override public void drop(DropTargetDropEvent d) {
                 resetZone(zone);
                 try {
                     d.acceptDrop(DnDConstants.ACTION_COPY);
                     @SuppressWarnings("unchecked")
-                    List<File> files = (List<File>) d.getTransferable()
+                    java.util.List<File> files = (java.util.List<File>) d.getTransferable()
                             .getTransferData(DataFlavor.javaFileListFlavor);
                     if (!files.isEmpty()) {
                         File f = files.get(0);
                         if (f.getName().toLowerCase().endsWith(".csv")) {
                             chargerCSV(f);
                         } else {
-                            setStatus("❌ File rejected: not a .csv file", Color.RED);
+                            setStatus("File rejected: not a .csv file", Color.RED);
                         }
                     }
                     d.dropComplete(true);
                 } catch (Exception ex) {
                     d.dropComplete(false);
-                    setStatus("❌ Drop error : " + ex.getMessage(), Color.RED);
+                    setStatus("Drop error : " + ex.getMessage(), Color.RED);
                 }
             }
         }, true);
@@ -170,44 +167,30 @@ public class HomePanel extends JPanel {
     }
 
     // =========================================================================
-    // Import CSV — délégué à CSV.chargement()
+    // Import CSV
     // =========================================================================
 
-    /**
-     * Charge le fichier CSV via la classe CSV, puis met à jour les trois tables
-     * de l'interface avec les données importées.
-     *
-     * La totalité du parsing (date, heure, durée, création des objets métier)
-     * est déléguée à {@link CSV#chargement(String)}.
-     * HomePanel se contente de vider les tables, de lancer le chargement,
-     * puis de les remplir depuis les listes statiques du modèle.
-     *
-     * @param fichier Le fichier CSV à charger.
-     */
     private void chargerCSV(File fichier) {
 
-        // Vider les tables avant rechargement
         modelUsers.setRowCount(0);
         modelRess.setRowCount(0);
         modelReserv.setRowCount(0);
 
-        // Délégation à CSV
-        CSV.CsvResult result = csv.chargement(fichier.getAbsolutePath());
-
-        // Erreur fatale (ex : fichier illisible)
-        if (!result.isOk()) {
-            setStatus("❌ Read error : " + result.erreurFatale, Color.RED);
+        try {
+            csv.chargement(fichier.getAbsolutePath());
+        } catch (IOException ex) {
+            setStatus("Read error : " + ex.getMessage(), Color.RED);
             return;
         }
 
         // Remplissage des tables depuis les listes statiques du modèle
-        for (Utilisateur u : Utilisateur.liste_utilisateur) {
+        for (Utilisateur u : Utilisateur.liste_utilisateur)
             modelUsers.addRow(new Object[]{ u.getNom() });
-        }
-        for (Ressources r : Ressources.liste_ressource) {
+
+        for (Ressources r : Ressources.liste_ressource)
             modelRess.addRow(new Object[]{ r.getNom(), r.getDescription(), r.getDomaine() });
-        }
-        for (Reservations r : Reservations.liste_reservations) {
+
+        for (Reservations r : Reservations.liste_reservations)
             modelReserv.addRow(new Object[]{
                 r.getUser().getNom(),
                 r.getRessource().getNom(),
@@ -218,30 +201,19 @@ public class HomePanel extends JPanel {
                 r.getDuree(),
                 r.getType_emprunt()
             });
-        }
 
-        // Message de statut
-        String msg = String.format(
-            "✅ Import complete — %d user(s), %d ressource(s), %d reservation(s)",
-            result.nbUsers, result.nbRessources, result.nbReservations);
-        if (result.nbErreurs > 0)
-            msg += String.format(" — ⚠️ %d line(s) skipped", result.nbErreurs);
-
-        setStatus(msg, result.nbErreurs == 0 ? new Color(0, 130, 0) : new Color(170, 90, 0));
+        setStatus(
+            String.format("Import complete — %d user(s), %d ressource(s), %d reservation(s)",
+                Utilisateur.liste_utilisateur.size(),
+                Ressources.liste_ressource.size(),
+                Reservations.liste_reservations.size()),
+            new Color(0, 130, 0));
     }
 
     // =========================================================================
-    // Export CSV — délégué à CSV.export()
+    // Export CSV
     // =========================================================================
 
-    /**
-     * Exporte les réservations en mémoire via la classe CSV.
-     *
-     * L'utilisateur choisit la destination via un JFileChooser.
-     * La totalité de l'écriture est déléguée à {@link CSV#export(String)}.
-     * HomePanel se contente d'ouvrir le sélecteur de fichier et d'afficher
-     * le résultat.
-     */
     void exporterCSV() {
         JFileChooser fc = new JFileChooser();
         fc.setSelectedFile(new File("export_gmi.csv"));
@@ -253,18 +225,17 @@ public class HomePanel extends JPanel {
         if (!dest.getName().toLowerCase().endsWith(".csv"))
             dest = new File(dest.getAbsolutePath() + ".csv");
 
-        // Délégation à CSV
-        CSV.CsvResult result = csv.export(dest.getAbsolutePath());
-
-        if (!result.isOk()) {
-            setStatus("❌ Export error : " + result.erreurFatale, Color.RED);
+        try {
+            csv.export(dest.getAbsolutePath());
+        } catch (IOException ex) {
+            setStatus("Export error : " + ex.getMessage(), Color.RED);
             JOptionPane.showMessageDialog(this,
-                    "Export error:\n" + result.erreurFatale,
+                    "Export error:\n" + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        setStatus("💾 Export successful → " + dest.getAbsolutePath(), new Color(0, 130, 0));
+        setStatus("Export successful → " + dest.getAbsolutePath(), new Color(0, 130, 0));
         JOptionPane.showMessageDialog(this,
                 "Export successful!\n" + dest.getAbsolutePath(),
                 "Export CSV", JOptionPane.INFORMATION_MESSAGE);
@@ -274,12 +245,6 @@ public class HomePanel extends JPanel {
     // Utilitaires
     // =========================================================================
 
-    /**
-     * Formate une Date en chaîne dd/MM/yyyy pour l'affichage dans la table.
-     *
-     * @param d La date à formater.
-     * @return La chaîne formatée, ou "" si d est null.
-     */
     private String formatDate(Date d) {
         if (d == null) return "";
         Calendar c = Calendar.getInstance();
